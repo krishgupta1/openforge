@@ -24,14 +24,35 @@ export default function RootLayout({
         elements: {
           modal: {
             maxHeight: '70vh',
-            height: 'auto'
+            height: 'auto',
+            display: 'flex !important',
+            alignItems: 'center !important',
+            justifyContent: 'center !important',
+            position: 'fixed !important',
+            top: '50% !important',
+            left: '50% !important',
+            transform: 'translate(-50%, -50%) !important',
+            margin: '0 !important',
+            padding: '0 !important'
+          },
+          modalCard: {
+            position: 'relative !important',
+            transform: 'none !important',
+            top: 'auto !important',
+            left: 'auto !important',
+            margin: '0 !important'
           },
           rootBox: 'clerk-custom'
         }
       }}
     >
       <html lang="en" className="dark">
-        <body className="antialiased" suppressHydrationWarning>
+        <head>
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+          <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet" />
+        </head>
+        <body className="antialiased hanken-grotesk" suppressHydrationWarning>
           <SyncUser />
           <Navbar />
           {children}

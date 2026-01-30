@@ -1,6 +1,8 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   SignInButton,
   SignUpButton,
@@ -8,78 +10,78 @@ import {
   SignedOut,
   UserButton,
 } from "@clerk/nextjs";
+import { Menu } from "lucide-react";
 
 export default function Navbar() {
-
   return (
-    <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-black/20 border-b border-white/10">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        {/* --- LEFT: TEXT ONLY (NO ICON) --- */}
-        <Link href="/" className="group transition-opacity hover:opacity-80">
-          <span className="font-bold tracking-tight text-white text-lg">
+    // --- FLOATING CONTAINER ---
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-fit px-4">
+      {/* --- CAPSULE NAV --- */}
+      <nav className="flex items-center justify-between gap-8 rounded-full border border-white/10 bg-transparent backdrop-blur-md px-6 py-2.5 shadow-xl shadow-black/10">
+        {/* --- LEFT: BRAND (TEXT ONLY) --- */}
+        <Link href="/" className="flex items-center gap-2 group">
+          {/* ICON REMOVED HERE */}
+          <span className="text-sm font-bold tracking-tight text-white/90 group-hover:text-white transition-colors">
             OpenForge
           </span>
         </Link>
 
-        {/* --- CENTER: MAIN NAVIGATION --- */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden md:flex items-center gap-8">
+        {/* --- CENTER: LINKS --- */}
+        <div className="hidden md:flex items-center gap-1">
           <NavLink href="/projects">Projects</NavLink>
           <NavLink href="/ideas">Ideas</NavLink>
           <NavLink href="/contribute">Contribute</NavLink>
           <NavLink href="/about">About</NavLink>
         </div>
 
-        {/* --- RIGHT: ACTIONS & AUTH --- */}
-        <div className="flex items-center gap-4">
-          {/* --- AUTH BUTTONS --- */}
+        {/* --- RIGHT: ACTIONS --- */}
+        <div className="flex items-center gap-3">
           <SignedOut>
             <SignInButton mode="modal">
-              <button className="text-xs font-semibold text-gray-400 hover:text-white transition-colors tracking-wide uppercase">
+              <button className="text-xs font-medium text-neutral-300 hover:text-white transition-colors px-2 focus:outline-none">
                 Log In
               </button>
             </SignInButton>
 
+            <div className="w-px h-4 bg-white/10 mx-1"></div>
+
             <SignUpButton mode="modal">
-              <button className="group relative inline-flex h-9 items-center justify-center overflow-hidden rounded-full bg-white px-6 font-medium text-black transition-all hover:bg-gray-200">
-                <span className="relative text-xs font-bold uppercase tracking-wide">
-                  Join
-                </span>
+              <button className="text-xs font-bold text-white hover:text-white/80 transition-colors bg-white/10 px-4 py-1.5 rounded-full border border-white/5 hover:bg-white/20 focus:outline-none">
+                Join
               </button>
             </SignUpButton>
           </SignedOut>
 
           <SignedIn>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Link
                 href="/new-idea"
-                className="hidden sm:flex items-center justify-center h-9 w-9 rounded-full border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 transition-all"
-                title="Share new idea"
+                className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-neutral-400 hover:text-white hover:bg-white/10 transition-all focus:outline-none"
+                title="Create New"
               >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M12 5V19M5 12H19" />
-                </svg>
+                <span className="text-lg leading-none font-light mb-0.5">
+                  +
+                </span>
               </Link>
 
               <UserButton
                 appearance={{
                   elements: {
                     avatarBox:
-                      "w-8 h-8 border border-white/10 ring-2 ring-transparent hover:ring-white/10 transition-all",
+                      "w-7 h-7 ring-1 ring-white/10 hover:ring-white/30 transition-all",
                   },
                 }}
               />
             </div>
           </SignedIn>
+
+          {/* Mobile Toggle */}
+          <button className="md:hidden text-neutral-400 hover:text-white ml-2 focus:outline-none">
+            <Menu className="w-5 h-5" />
+          </button>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 }
 
@@ -91,10 +93,19 @@ function NavLink({
   href: string;
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
   return (
     <Link
       href={href}
-      className="text-sm font-medium text-gray-400 hover:text-white transition-colors duration-200"
+      // Added focus:outline-none to remove browser default click rings
+      // Added border-transparent to the inactive state to ensure smooth transition when the active border is removed
+      className={`px-3 py-1.5 text-xs font-medium transition-all duration-300 rounded-full focus:outline-none border ${
+        isActive
+          ? "text-white bg-white/10 border-white/5"
+          : "text-neutral-400 hover:text-white hover:bg-white/5 border-transparent"
+      }`}
     >
       {children}
     </Link>
