@@ -16,6 +16,7 @@ module.exports = {
         'comic-neue': 'var(--font-comic-neue)',
         'hanken-grotesk': 'var(--font-hanken-grotesk)',
         'space-grotesk': 'var(--font-space-grotesk)',
+        sans: ['var(--font-hanken-grotesk)', 'system-ui', 'sans-serif'],
       },
     },
   },

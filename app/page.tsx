@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center font-mono p-4 transition-colors duration-300">
+    <main className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-4 transition-colors duration-300">
       {/* --- Placeholder Header --- */}
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold tracking-tighter mb-2">OpenForge</h1>

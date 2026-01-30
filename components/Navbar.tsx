@@ -12,7 +12,7 @@ import {
 export default function Navbar() {
 
   return (
-    <nav className="fixed top-0 w-full z-50">
+    <nav className="fixed top-0 w-full z-50 backdrop-blur-md bg-black/20 border-b border-white/10">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         {/* --- LEFT: TEXT ONLY (NO ICON) --- */}
         <Link href="/" className="group transition-opacity hover:opacity-80">
