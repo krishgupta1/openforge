@@ -35,22 +35,48 @@ const Label = ({
 
 const Input = ({
   className = "",
+  error = "",
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <input
-    className={`w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-transparent transition-all hover:border-zinc-700 ${className}`}
-    {...props}
-  />
+}: React.InputHTMLAttributes<HTMLInputElement> & { error?: string }) => (
+  <div>
+    <input
+      className={`w-full bg-[#09090b] border rounded-lg px-4 py-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all hover:border-zinc-700 ${
+        error
+          ? "border-red-500 focus:ring-red-500/20 hover:border-red-500"
+          : "border-zinc-800 focus:ring-zinc-700"
+      } ${className}`}
+      {...props}
+    />
+    {error && (
+      <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+        <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+        {error}
+      </p>
+    )}
+  </div>
 );
 
 const Textarea = ({
   className = "",
+  error = "",
   ...props
-}: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
-  <textarea
-    className={`w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-transparent transition-all hover:border-zinc-700 resize-none ${className}`}
-    {...props}
-  />
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: string }) => (
+  <div>
+    <textarea
+      className={`w-full bg-[#09090b] border rounded-lg px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all hover:border-zinc-700 resize-none ${
+        error
+          ? "border-red-500 focus:ring-red-500/20 hover:border-red-500"
+          : "border-zinc-800 focus:ring-zinc-700"
+      } ${className}`}
+      {...props}
+    />
+    {error && (
+      <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+        <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+        {error}
+      </p>
+    )}
+  </div>
 );
 
 // --- Main Page Component ---
@@ -68,6 +94,7 @@ export default function FeatureIdeaPage() {
     wantToWorkOn: false,
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -76,14 +103,84 @@ export default function FeatureIdeaPage() {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user makes a selection
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    // Feature Title validation
+    if (!formData.featureTitle.trim()) {
+      newErrors.featureTitle = "Feature title is required";
+    } else if (formData.featureTitle.trim().length < 5) {
+      newErrors.featureTitle = "Title must be at least 5 characters";
+    } else if (formData.featureTitle.trim().length > 100) {
+      newErrors.featureTitle = "Title must be less than 100 characters";
+    }
+
+    // Problem Statement validation
+    if (!formData.problem.trim()) {
+      newErrors.problem = "Problem statement is required";
+    } else if (formData.problem.trim().length < 10) {
+      newErrors.problem = "Problem statement must be at least 10 characters";
+    } else if (formData.problem.trim().length > 200) {
+      newErrors.problem = "Problem statement must be less than 200 characters";
+    }
+
+    // Feature Description validation
+    if (!formData.featureDescription.trim()) {
+      newErrors.featureDescription = "Feature description is required";
+    } else if (formData.featureDescription.trim().length < 20) {
+      newErrors.featureDescription = "Description must be at least 20 characters";
+    } else if (formData.featureDescription.trim().length > 1000) {
+      newErrors.featureDescription = "Description must be less than 1000 characters";
+    }
+
+    // Feature Type validation
+    if (!formData.featureType) {
+      newErrors.featureType = "Please select a feature type";
+    }
+
+    // Priority validation
+    if (!formData.priority) {
+      newErrors.priority = "Please select a priority level";
+    }
+
+    // Optional field validations (only if filled)
+    if (formData.name && formData.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
+    }
+
+    if (formData.github && !/^[a-zA-Z0-9]([a-zA-Z0-9-]{0,38})$/.test(formData.github)) {
+      newErrors.github = "Please enter a valid GitHub username (e.g., username)";
+    }
+
+    if (formData.linkedin && !/^in\/[a-zA-Z0-9]([a-zA-Z0-9-]{0,99})$/.test(formData.linkedin)) {
+      newErrors.linkedin = "Please enter a valid LinkedIn username (e.g., in/username)";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsSubmitting(true);
 
     // Mock Submission
@@ -162,6 +259,7 @@ export default function FeatureIdeaPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   placeholder="e.g. John Doe"
+                  error={errors.name}
                 />
               </div>
 
@@ -176,6 +274,7 @@ export default function FeatureIdeaPage() {
                       onChange={handleInputChange}
                       placeholder="username"
                       className="pl-11"
+                      error={errors.github}
                     />
                   </div>
                 </div>
@@ -189,6 +288,7 @@ export default function FeatureIdeaPage() {
                       onChange={handleInputChange}
                       placeholder="in/username"
                       className="pl-11"
+                      error={errors.linkedin}
                     />
                   </div>
                 </div>
@@ -211,6 +311,7 @@ export default function FeatureIdeaPage() {
                   onChange={handleInputChange}
                   placeholder="e.g. Dark Mode for Dashboard"
                   required
+                  error={errors.featureTitle}
                 />
               </div>
 
@@ -223,6 +324,7 @@ export default function FeatureIdeaPage() {
                   placeholder="Briefly describe the issue this feature solves (1-2 lines)"
                   rows={2}
                   required
+                  error={errors.problem}
                 />
               </div>
 
@@ -235,6 +337,7 @@ export default function FeatureIdeaPage() {
                   placeholder="High-level overview of how the feature should work"
                   rows={6}
                   required
+                  error={errors.featureDescription}
                 />
               </div>
 
@@ -244,8 +347,9 @@ export default function FeatureIdeaPage() {
                   <Label>Type</Label>
                   <DropdownMenu>
                     <DropdownMenuTrigger>
-                      <div
-                        className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all flex items-center justify-between group cursor-pointer"
+                      <button
+                        type="button"
+                        className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all flex items-center justify-between group"
                       >
                         <span
                           className={
@@ -257,7 +361,7 @@ export default function FeatureIdeaPage() {
                           {formData.featureType || "Select type"}
                         </span>
                         <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
-                      </div>
+                      </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-[#09090b] border-zinc-800 text-zinc-300">
                       {[
@@ -288,24 +392,19 @@ export default function FeatureIdeaPage() {
                   <Label>Priority</Label>
                   <DropdownMenu>
                     <DropdownMenuTrigger>
-                      <div
-                        className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all flex items-center justify-between group cursor-pointer"
+                      <button
+                        type="button"
+                        className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all flex items-center justify-between group"
                       >
                         <span
                           className={
-                            formData.priority 
-                              ? formData.priority === "High" 
-                                ? "text-white font-bold"
-                                : formData.priority === "Medium"
-                                  ? "text-white font-semibold"
-                                  : "text-white font-normal"
-                              : "text-white"
+                            formData.priority ? "text-white" : "text-zinc-600"
                           }
                         >
                           {formData.priority || "Select priority"}
                         </span>
                         <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
-                      </div>
+                      </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-[#09090b] border-zinc-800 text-zinc-300">
                       {["Low", "Medium", "High"].map((priority) => (

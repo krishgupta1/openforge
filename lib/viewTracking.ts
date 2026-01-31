@@ -3,7 +3,7 @@ import { db } from "./firebase";
 
 interface ViewRecord {
   userId?: string;
-  timestamp: any;
+  timestamp: number; // Changed from any to number for client timestamp
   userAgent?: string;
   ip?: string;
 }
@@ -30,20 +30,25 @@ export async function trackProjectView(projectId: string, userId?: string) {
     // Optionally track detailed view analytics in a separate collection
     const viewRecord: ViewRecord = {
       userId,
-      timestamp: new Date(),
+timestamp: Date.now(), // Use client timestamp for arrayUnion
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
       ip: typeof window !== 'undefined' ? await getClientIP() : undefined
     };
 
+    // Filter out undefined values before passing to arrayUnion
+    const cleanViewRecord = Object.fromEntries(
+      Object.entries(viewRecord).filter(([_, value]) => value !== undefined)
+    );
+
     const analyticsRef = doc(db, "projectAnalytics", projectId);
     await updateDoc(analyticsRef, {
-      totalViews: arrayUnion(viewRecord),
+      totalViews: arrayUnion(cleanViewRecord),
       updatedAt: serverTimestamp()
     }).catch(async () => {
       // If document doesn't exist, create it
       await updateDoc(analyticsRef, {
         projectId,
-        totalViews: [viewRecord],
+        totalViews: [cleanViewRecord],
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       });

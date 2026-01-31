@@ -1,0 +1,449 @@
+"use client";
+
+import React, { useState } from "react";
+import {
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  Github,
+  Linkedin,
+  Loader2,
+  Lock,
+  Phone,
+  Sparkles,
+  User,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+// --- Custom UI Components ---
+
+const Label = ({
+  children,
+  className = "",
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <label
+    className={`block text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-2.5 ${className}`}
+  >
+    {children}
+  </label>
+);
+
+const Input = ({
+  className = "",
+  readOnly,
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement>) => (
+  <input
+    className={`w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-transparent transition-all hover:border-zinc-700 ${
+      readOnly ? "opacity-60 cursor-not-allowed bg-zinc-900/50" : ""
+    } ${className}`}
+    readOnly={readOnly}
+    {...props}
+  />
+);
+
+const Textarea = ({
+  className = "",
+  ...props
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
+  <textarea
+    className={`w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-transparent transition-all hover:border-zinc-700 resize-none ${className}`}
+    {...props}
+  />
+);
+
+// --- Main Page Component ---
+
+export default function ShareIdeaPage() {
+  const [formData, setFormData] = useState({
+    // User Details
+    name: "Alex Chen", // Simulating Auto-filled
+    github: "",
+    linkedin: "",
+    mobile: "",
+    
+    // Contribution Context
+    helpContext: "",
+    
+    // Project Context
+    projectTitle: "",
+    problem: "",
+    solution: "",
+    category: "",
+    difficulty: "",
+    lookingFor: "",
+    leadProject: false,
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // --- Dropdown Options ---
+  const categories = ["Web App", "Mobile App", "AI / ML", "Tool / Library", "Hardware", "Other"];
+  const difficulties = ["Beginner Friendly", "Intermediate", "Advanced"];
+  const lookingForRoles = ["Frontend Developers", "Backend Developers", "Full Stack", "Designers", "AI Engineers", "All Roles"];
+
+  // --- Handlers ---
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const isFormValid = 
+    formData.github && 
+    formData.helpContext && 
+    formData.projectTitle && 
+    formData.problem && 
+    formData.solution && 
+    formData.category && 
+    formData.difficulty && 
+    formData.lookingFor;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isFormValid) return;
+    
+    setIsSubmitting(true);
+
+    // Mock Submission
+    setTimeout(() => {
+      console.log("Idea Shared:", formData);
+      setIsSubmitted(true);
+      setIsSubmitting(false);
+
+      // Reset
+      setTimeout(() => {
+        setIsSubmitted(false);
+        // Reset only non-user fields
+        setFormData((prev) => ({
+          ...prev,
+          github: "",
+          linkedin: "",
+          mobile: "",
+          helpContext: "",
+          projectTitle: "",
+          problem: "",
+          solution: "",
+          category: "",
+          difficulty: "",
+          lookingFor: "",
+          leadProject: false,
+        }));
+      }, 3000);
+    }, 1500);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-zinc-800">
+      <div className="max-w-2xl mx-auto px-6 py-24">
+        
+        {/* --- Header --- */}
+        <div className="mb-12">
+          <Link
+            href="/ideas"
+            className="group inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-white transition-colors mb-8"
+          >
+            <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+            Back to Ideas
+          </Link>
+
+          <h1 className="text-3xl font-bold tracking-tight text-white mb-3 flex items-center gap-3">
+            <Sparkles className="w-8 h-8 text-yellow-500" />
+            Share an Idea
+          </h1>
+          <p className="text-zinc-400 text-base">
+            Propose a new project to the community and find collaborators.
+          </p>
+        </div>
+
+        {/* --- Success Toast --- */}
+        {isSubmitted && (
+          <div className="mb-10 p-4 bg-emerald-500/5 border border-emerald-500/20 rounded-lg flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+            <div className="h-8 w-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+              <Check className="w-4 h-4 text-emerald-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-white">Idea Published Successfully</p>
+              <p className="text-xs text-zinc-400">Your project is now live on the Ideas board.</p>
+            </div>
+          </div>
+        )}
+
+        {/* --- Form --- */}
+        <form onSubmit={handleSubmit} className="space-y-12">
+
+          {/* SECTION 1: USER DETAILS */}
+          <div className="space-y-6">
+            <h3 className="text-sm font-medium text-zinc-200 pb-4 border-b border-zinc-900">
+              User Details
+            </h3>
+            
+            <div className="space-y-5">
+              {/* Name (Auto-filled) */}
+              <div>
+                <Label>Name</Label>
+                <div className="relative">
+                  <User className="absolute left-4 top-3.5 w-4 h-4 text-zinc-500 pointer-events-none" />
+                  <Input
+                    name="name"
+                    value={formData.name}
+                    readOnly
+                    className="pl-11 text-zinc-400"
+                  />
+                </div>
+              </div>
+
+              {/* GitHub (Required) */}
+              <div>
+                <Label>GitHub Profile <span className="text-red-500">*</span></Label>
+                <div className="relative">
+                  <Github className="absolute left-4 top-3.5 w-4 h-4 text-zinc-500 pointer-events-none" />
+                  <Input
+                    name="github"
+                    value={formData.github}
+                    onChange={handleInputChange}
+                    placeholder="username"
+                    className="pl-11"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* LinkedIn */}
+                <div>
+                  <Label>LinkedIn <span className="text-zinc-600 font-normal ml-1">(Optional)</span></Label>
+                  <div className="relative">
+                    <Linkedin className="absolute left-4 top-3.5 w-4 h-4 text-zinc-500 pointer-events-none" />
+                    <Input
+                      name="linkedin"
+                      value={formData.linkedin}
+                      onChange={handleInputChange}
+                      placeholder="in/username"
+                      className="pl-11"
+                    />
+                  </div>
+                </div>
+
+                {/* Mobile No */}
+                <div>
+                  <Label>Mobile No <span className="text-zinc-600 font-normal ml-1">(Optional)</span></Label>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-3.5 w-4 h-4 text-zinc-500 pointer-events-none" />
+                    <Input
+                      type="tel"
+                      name="mobile"
+                      value={formData.mobile}
+                      onChange={handleInputChange}
+                      placeholder="+91 00000 00000"
+                      className="pl-11"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Helper Text */}
+              <div className="flex items-center gap-2 text-xs text-zinc-500 bg-zinc-900/50 p-3 rounded-md border border-zinc-800/50">
+                <Lock className="w-3 h-3 text-zinc-400" />
+                <span>Contact info is only shared with project collaborators if you approve.</span>
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 2: CONTRIBUTION CONTEXT */}
+          <div className="space-y-6">
+            <h3 className="text-sm font-medium text-zinc-200 pb-4 border-b border-zinc-900">
+              Contribution Context
+            </h3>
+
+            <div>
+              <Label>How will you help on this project? <span className="text-red-500">*</span></Label>
+              <Textarea
+                name="helpContext"
+                value={formData.helpContext}
+                onChange={handleInputChange}
+                placeholder="I will lead the backend architecture and set up the database..."
+                rows={2}
+                required
+              />
+              <p className="text-xs text-zinc-600 mt-2">Briefly describe your role (1-2 lines).</p>
+            </div>
+          </div>
+
+          {/* SECTION 3: PROJECT CONTEXT */}
+          <div className="space-y-6">
+            <h3 className="text-sm font-medium text-zinc-200 pb-4 border-b border-zinc-900">
+              Project Context
+            </h3>
+
+            <div className="space-y-6">
+              {/* Project Title */}
+              <div>
+                <Label>Project Title <span className="text-red-500">*</span></Label>
+                <Input
+                  name="projectTitle"
+                  value={formData.projectTitle}
+                  onChange={handleInputChange}
+                  placeholder="e.g. AI Study Planner"
+                  required
+                />
+              </div>
+
+              {/* Problem */}
+              <div>
+                <Label>Problem Statement <span className="text-red-500">*</span></Label>
+                <Textarea
+                  name="problem"
+                  value={formData.problem}
+                  onChange={handleInputChange}
+                  placeholder="What problem are you solving?"
+                  rows={3}
+                  required
+                />
+              </div>
+
+              {/* Solution */}
+              <div>
+                <Label>Proposed Solution <span className="text-red-500">*</span></Label>
+                <Textarea
+                  name="solution"
+                  value={formData.solution}
+                  onChange={handleInputChange}
+                  placeholder="How does your project solve this?"
+                  rows={4}
+                  required
+                />
+              </div>
+
+              {/* Dropdowns Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                
+                {/* Category */}
+                <div className="flex flex-col">
+                  <Label>Category <span className="text-red-500">*</span></Label>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all flex items-center justify-between group">
+                      <span className={formData.category ? "text-white" : "text-zinc-600"}>
+                        {formData.category || "Select Category"}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-[#09090b] border-zinc-800 text-zinc-300">
+                      {categories.map((cat) => (
+                        <DropdownMenuItem key={cat} onClick={() => handleSelectChange("category", cat)} className={`cursor-pointer focus:bg-zinc-800 focus:text-white my-0.5 ${formData.category === cat ? "bg-zinc-800 text-white" : ""}`}>
+                          {cat}
+                          {formData.category === cat && <Check className="w-3 h-3 ml-auto" />}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+
+                {/* Difficulty */}
+                <div className="flex flex-col">
+                  <Label>Difficulty <span className="text-red-500">*</span></Label>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all flex items-center justify-between group">
+                      <span className={formData.difficulty ? "text-white" : "text-zinc-600"}>
+                        {formData.difficulty || "Select Difficulty"}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-[#09090b] border-zinc-800 text-zinc-300">
+                      {difficulties.map((diff) => (
+                        <DropdownMenuItem key={diff} onClick={() => handleSelectChange("difficulty", diff)} className={`cursor-pointer focus:bg-zinc-800 focus:text-white my-0.5 ${formData.difficulty === diff ? "bg-zinc-800 text-white" : ""}`}>
+                          {diff}
+                          {formData.difficulty === diff && <Check className="w-3 h-3 ml-auto" />}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                    {/* Looking For */}
+                <div className="flex flex-col sm:col-span-2">
+                  <Label>Looking For <span className="text-red-500">*</span></Label>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all flex items-center justify-between group">
+                      <span className={formData.lookingFor ? "text-white" : "text-zinc-600"}>
+                        {formData.lookingFor || "Who do you need?"}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-[#09090b] border-zinc-800 text-zinc-300">
+                      {lookingForRoles.map((role) => (
+                        <DropdownMenuItem key={role} onClick={() => handleSelectChange("lookingFor", role)} className={`cursor-pointer focus:bg-zinc-800 focus:text-white my-0.5 ${formData.lookingFor === role ? "bg-zinc-800 text-white" : ""}`}>
+                          {role}
+                          {formData.lookingFor === role && <Check className="w-3 h-3 ml-auto" />}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* SECTION 4: ACTIONS */}
+          <div className="pt-4">
+             {/* Lead Project Checkbox */}
+            <div 
+              onClick={() => setFormData(prev => ({ ...prev, leadProject: !prev.leadProject }))}
+              className={`group flex items-center gap-4 p-5 rounded-xl border cursor-pointer transition-all duration-200 mb-8 ${
+                formData.leadProject 
+                  ? "bg-zinc-900 border-zinc-700" 
+                  : "bg-transparent border-zinc-800 hover:border-zinc-700"
+              }`}
+            >
+              <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors shadow-sm ${
+                formData.leadProject 
+                  ? "bg-white border-white text-black" 
+                  : "bg-[#09090b] border-zinc-700 group-hover:border-zinc-500"
+              }`}>
+                {formData.leadProject && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
+              </div>
+              
+              <div className="flex flex-col select-none">
+                <span className={`text-sm font-medium transition-colors ${
+                  formData.leadProject ? "text-white" : "text-zinc-300"
+                }`}>
+                  I want to lead this project
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting || !isFormValid}
+              className="w-full bg-white text-black text-sm font-bold py-4 rounded-lg hover:bg-zinc-200 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Publishing Idea...
+                </>
+              ) : (
+                "Publish Idea"
+              )}
+            </button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  );
+}

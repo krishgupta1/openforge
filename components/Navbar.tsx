@@ -54,16 +54,6 @@ export default function Navbar() {
 
           <SignedIn>
             <div className="flex items-center gap-3">
-              <Link
-                href="/new-idea"
-                className="hidden sm:flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 text-neutral-400 hover:text-white hover:bg-white/10 transition-all focus:outline-none"
-                title="Create New"
-              >
-                <span className="text-lg leading-none font-light mb-0.5">
-                  +
-                </span>
-              </Link>
-
               <UserButton
                 appearance={{
                   elements: {
