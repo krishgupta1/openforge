@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Check,
@@ -8,14 +8,17 @@ import {
   Github,
   Linkedin,
   Loader2,
+  Lightbulb,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createProjectFeature } from "@/lib/firebase";
 
 // --- Custom UI Components ---
 
@@ -82,15 +85,19 @@ const Textarea = ({
 // --- Main Page Component ---
 
 export default function FeatureIdeaPage() {
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get('projectId');
+  const projectName = searchParams.get('projectName');
+  
   const [formData, setFormData] = useState({
     name: "",
     github: "",
     linkedin: "",
-    featureTitle: "",
-    problem: "",
-    featureDescription: "",
-    featureType: "",
-    priority: "",
+    title: "",
+    description: "",
+    category: "",
+    difficulty: "",
+    solution: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -120,40 +127,40 @@ export default function FeatureIdeaPage() {
     const newErrors: Record<string, string> = {};
 
     // Feature Title validation
-    if (!formData.featureTitle.trim()) {
-      newErrors.featureTitle = "Feature title is required";
-    } else if (formData.featureTitle.trim().length < 5) {
-      newErrors.featureTitle = "Title must be at least 5 characters";
-    } else if (formData.featureTitle.trim().length > 100) {
-      newErrors.featureTitle = "Title must be less than 100 characters";
+    if (!formData.title.trim()) {
+      newErrors.title = "Feature title is required";
+    } else if (formData.title.trim().length < 5) {
+      newErrors.title = "Title must be at least 5 characters";
+    } else if (formData.title.trim().length > 100) {
+      newErrors.title = "Title must be less than 100 characters";
     }
 
-    // Problem Statement validation
-    if (!formData.problem.trim()) {
-      newErrors.problem = "Problem statement is required";
-    } else if (formData.problem.trim().length < 10) {
-      newErrors.problem = "Problem statement must be at least 10 characters";
-    } else if (formData.problem.trim().length > 200) {
-      newErrors.problem = "Problem statement must be less than 200 characters";
+    // Description validation
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    } else if (formData.description.trim().length < 10) {
+      newErrors.description = "Description must be at least 10 characters";
+    } else if (formData.description.trim().length > 500) {
+      newErrors.description = "Description must be less than 500 characters";
     }
 
-    // Feature Description validation
-    if (!formData.featureDescription.trim()) {
-      newErrors.featureDescription = "Feature description is required";
-    } else if (formData.featureDescription.trim().length < 20) {
-      newErrors.featureDescription = "Description must be at least 20 characters";
-    } else if (formData.featureDescription.trim().length > 1000) {
-      newErrors.featureDescription = "Description must be less than 1000 characters";
+    // Solution validation
+    if (!formData.solution.trim()) {
+      newErrors.solution = "Solution details are required";
+    } else if (formData.solution.trim().length < 20) {
+      newErrors.solution = "Solution must be at least 20 characters";
+    } else if (formData.solution.trim().length > 1000) {
+      newErrors.solution = "Solution must be less than 1000 characters";
     }
 
-    // Feature Type validation
-    if (!formData.featureType) {
-      newErrors.featureType = "Please select a feature type";
+    // Category validation
+    if (!formData.category) {
+      newErrors.category = "Please select a category";
     }
 
-    // Priority validation
-    if (!formData.priority) {
-      newErrors.priority = "Please select a priority level";
+    // Difficulty validation
+    if (!formData.difficulty) {
+      newErrors.difficulty = "Please select a difficulty level";
     }
 
     // Optional field validations (only if filled)
@@ -182,25 +189,48 @@ export default function FeatureIdeaPage() {
     
     setIsSubmitting(true);
 
-    // Mock Submission
-    setTimeout(() => {
-      console.log("Submitted:", formData);
+    try {
+      if (!projectId || !projectName) {
+        throw new Error('Project information is missing');
+      }
+
+      const featureData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        difficulty: formData.difficulty,
+        solution: formData.solution,
+        name: formData.name || 'Anonymous',
+        github: formData.github || 'N/A',
+        linkedin: formData.linkedin,
+        projectId: projectId,
+        projectName: decodeURIComponent(projectName),
+      };
+
+      await createProjectFeature(featureData);
+      
       setIsSubmitted(true);
       setIsSubmitting(false);
 
       // Reset after delay
       setTimeout(() => {
         setIsSubmitted(false);
-        setFormData((prev) => ({
-          ...prev,
-          featureTitle: "",
-          problem: "",
-          featureDescription: "",
-          featureType: "",
-          priority: "",
-        }));
+        setFormData({
+          name: "",
+          github: "",
+          linkedin: "",
+          title: "",
+          description: "",
+          category: "",
+          difficulty: "",
+          solution: "",
+        });
       }, 3000);
-    }, 1500);
+    } catch (error) {
+      console.error('Error submitting feature:', error);
+      setIsSubmitting(false);
+      // You could show an error message here
+    }
   };
 
   return (
@@ -209,18 +239,27 @@ export default function FeatureIdeaPage() {
         {/* --- Header --- */}
         <div className="mb-12">
           <Link
-            href="/projects/notesbuddy"
+            href={projectId ? `/projects/${projectId}` : "/projects"}
             className="group inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-white transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            Back to Project
+            Back to {projectName ? decodeURIComponent(projectName) : "Projects"}
           </Link>
 
-          <h1 className="text-3xl font-bold tracking-tight text-white mb-3">
-            New Feature Proposal
-          </h1>
+          <div className="flex items-center gap-3 mb-3">
+            <h1 className="text-3xl font-bold tracking-tight text-white">
+              New Feature Proposal
+            </h1>
+            {projectName && (
+              <span className="px-3 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-full text-sm font-medium">
+                📁 {decodeURIComponent(projectName)}
+              </span>
+            )}
+          </div>
           <p className="text-zinc-400 text-base">
-            Submit a request to improve the NotesBuddy platform.
+            {projectName 
+              ? `Suggest a new feature for ${decodeURIComponent(projectName)}.`
+              : "Submit a request to improve our platform."}
           </p>
         </div>
 
@@ -305,57 +344,57 @@ export default function FeatureIdeaPage() {
               <div>
                 <Label>Feature Title</Label>
                 <Input
-                  name="featureTitle"
-                  value={formData.featureTitle}
+                  name="title"
+                  value={formData.title}
                   onChange={handleInputChange}
                   placeholder="e.g. Dark Mode for Dashboard"
                   required
-                  error={errors.featureTitle}
-                />
-              </div>
-
-              <div>
-                <Label>Problem Statement</Label>
-                <Textarea
-                  name="problem"
-                  value={formData.problem}
-                  onChange={handleInputChange}
-                  placeholder="Briefly describe the issue this feature solves (1-2 lines)"
-                  rows={2}
-                  required
-                  error={errors.problem}
+                  error={errors.title}
                 />
               </div>
 
               <div>
                 <Label>Description</Label>
                 <Textarea
-                  name="featureDescription"
-                  value={formData.featureDescription}
+                  name="description"
+                  value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="High-level overview of how the feature should work"
+                  placeholder="Briefly describe the feature and what problem it solves"
+                  rows={3}
+                  required
+                  error={errors.description}
+                />
+              </div>
+
+              <div>
+                <Label>Proposed Solution</Label>
+                <Textarea
+                  name="solution"
+                  value={formData.solution}
+                  onChange={handleInputChange}
+                  placeholder="High-level overview of how the feature should work and implementation details"
                   rows={6}
                   required
-                  error={errors.featureDescription}
+                  error={errors.solution}
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* Type Dropdown */}
+                {/* Category Dropdown */}
                 <div className="flex flex-col">
-                  <Label>Type</Label>
+                  <Label>Category</Label>
                   <DropdownMenu>
                     <DropdownMenuTrigger
                       className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all flex items-center justify-between group"
                     >
                       <span
                         className={
-                          formData.featureType
+                          formData.category
                             ? "text-white"
                             : "text-zinc-600"
                         }
                       >
-                        {formData.featureType || "Select type"}
+                        {formData.category || "Select category"}
                       </span>
                       <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
                     </DropdownMenuTrigger>
@@ -364,74 +403,91 @@ export default function FeatureIdeaPage() {
                         "UI / UX",
                         "Functionality",
                         "Performance",
+                        "Security",
+                        "Integration",
                         "Enhancement",
-                      ].map((type) => (
+                      ].map((category) => (
                         <DropdownMenuItem
-                          key={type}
+                          key={category}
                           onClick={() =>
-                            handleSelectChange("featureType", type)
+                            handleSelectChange("category", category)
                           }
-                          className={`cursor-pointer focus:bg-zinc-800 focus:text-white my-0.5 ${formData.featureType === type ? "bg-zinc-800 text-white" : ""}`}
+                          className={`cursor-pointer focus:bg-zinc-800 focus:text-white my-0.5 ${formData.category === category ? "bg-zinc-800 text-white" : ""}`}
                         >
-                          {type}
-                          {formData.featureType === type && (
+                          {category}
+                          {formData.category === category && (
                             <Check className="w-3 h-3 ml-auto" />
                           )}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
+                  {errors.category && (
+                    <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+                      <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                      {errors.category}
+                    </p>
+                  )}
                 </div>
 
-                {/* Priority Dropdown */}
+                {/* Difficulty Dropdown */}
                 <div className="flex flex-col">
-                  <Label>Priority</Label>
+                  <Label>Difficulty</Label>
                   <DropdownMenu>
                     <DropdownMenuTrigger
                       className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all flex items-center justify-between group"
                     >
                       <span
                         className={
-                          formData.priority ? "text-white" : "text-zinc-600"
+                          formData.difficulty ? "text-white" : "text-zinc-600"
                         }
                       >
-                        {formData.priority || "Select priority"}
+                        {formData.difficulty || "Select difficulty"}
                       </span>
                       <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-[#09090b] border-zinc-800 text-zinc-300">
-                      {["Low", "Medium", "High"].map((priority) => (
+                      {["Beginner", "Intermediate", "Advanced", "Expert"].map((difficulty) => (
                         <DropdownMenuItem
-                          key={priority}
+                          key={difficulty}
                           onClick={() =>
-                            handleSelectChange("priority", priority)
+                            handleSelectChange("difficulty", difficulty)
                           }
-                          className={`cursor-pointer focus:bg-zinc-800 focus:text-white my-0.5 ${formData.priority === priority ? "bg-zinc-800 text-white" : ""}`}
+                          className={`cursor-pointer focus:bg-zinc-800 focus:text-white my-0.5 ${formData.difficulty === difficulty ? "bg-zinc-800 text-white" : ""}`}
                         >
-                          {priority}
-                          {formData.priority === priority && (
+                          {difficulty}
+                          {formData.difficulty === difficulty && (
                             <Check className="w-3 h-3 ml-auto" />
                           )}
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
+                  {errors.difficulty && (
+                    <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+                      <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                      {errors.difficulty}
+                    </p>
+                  )}
                 </div>
               </div>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-white text-black text-sm font-bold py-4 rounded-lg hover:bg-zinc-200 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" /> Submitting...
-                </>
-              ) : (
-                "Submit Proposal"
-              )}
-            </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-white text-black text-sm font-bold py-4 rounded-lg hover:bg-zinc-200 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Submitting...
+                  </>
+                ) : (
+                  <>
+                    <Lightbulb className="w-4 h-4" />
+                    Submit Feature Proposal
+                  </>
+                )}
+              </button>
           </div>
         </div>
         </form>

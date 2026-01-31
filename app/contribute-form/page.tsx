@@ -14,12 +14,14 @@ import {
   Lock,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { createProjectContribution } from "@/lib/firebase";
 
 // --- Custom UI Components ---
 
@@ -86,14 +88,21 @@ const Textarea = ({
 // --- Main Page Component ---
 
 export default function ContributionFormPage() {
+  const searchParams = useSearchParams();
+  const projectId = searchParams.get('projectId');
+  const projectName = searchParams.get('projectName');
+  
   const [formData, setFormData] = useState({
     name: "",
     github: "",
     linkedin: "",
     mobile: "",
-    prLink: "",
+    title: "",
+    description: "",
     contributionType: "",
-    whatChanged: "",
+    experienceLevel: "",
+    timeline: "",
+    howCanHelp: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -130,11 +139,31 @@ export default function ContributionFormPage() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    // PR Link validation
-    if (!formData.prLink.trim()) {
-      newErrors.prLink = "PR Link is required";
-    } else if (!/^https?:\/\/(www\.)?github\.com\/.+\/pull\/\d+/.test(formData.prLink)) {
-      newErrors.prLink = "Please enter a valid GitHub PR link";
+    // Title validation
+    if (!formData.title.trim()) {
+      newErrors.title = "Contribution title is required";
+    } else if (formData.title.trim().length < 5) {
+      newErrors.title = "Title must be at least 5 characters";
+    } else if (formData.title.trim().length > 100) {
+      newErrors.title = "Title must be less than 100 characters";
+    }
+
+    // Description validation
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    } else if (formData.description.trim().length < 10) {
+      newErrors.description = "Description must be at least 10 characters";
+    } else if (formData.description.trim().length > 500) {
+      newErrors.description = "Description must be less than 500 characters";
+    }
+
+    // How You Can Help validation
+    if (!formData.howCanHelp.trim()) {
+      newErrors.howCanHelp = "Please describe how you can help";
+    } else if (formData.howCanHelp.trim().length < 10) {
+      newErrors.howCanHelp = "Description must be at least 10 characters";
+    } else if (formData.howCanHelp.trim().length > 1000) {
+      newErrors.howCanHelp = "Description must be less than 1000 characters";
     }
 
     // Contribution Type validation
@@ -142,13 +171,14 @@ export default function ContributionFormPage() {
       newErrors.contributionType = "Please select a contribution type";
     }
 
-    // What Changed validation
-    if (!formData.whatChanged.trim()) {
-      newErrors.whatChanged = "Please describe what you changed";
-    } else if (formData.whatChanged.trim().length < 10) {
-      newErrors.whatChanged = "Description must be at least 10 characters";
-    } else if (formData.whatChanged.trim().length > 500) {
-      newErrors.whatChanged = "Description must be less than 500 characters";
+    // Experience Level validation
+    if (!formData.experienceLevel) {
+      newErrors.experienceLevel = "Please select an experience level";
+    }
+
+    // Timeline validation
+    if (!formData.timeline) {
+      newErrors.timeline = "Please select a timeline";
     }
 
     // Optional field validations (only if filled)
@@ -181,23 +211,52 @@ export default function ContributionFormPage() {
     
     setIsSubmitting(true);
 
-    // Mock Submission
-    setTimeout(() => {
-      console.log("Contribution submitted:", formData);
+    try {
+      if (!projectId || !projectName) {
+        throw new Error('Project information is missing');
+      }
+
+      const contributionData = {
+        title: formData.title,
+        description: formData.description,
+        contributionType: formData.contributionType,
+        experienceLevel: formData.experienceLevel,
+        timeline: formData.timeline,
+        howCanHelp: formData.howCanHelp,
+        name: formData.name || 'Anonymous',
+        github: formData.github || 'N/A',
+        linkedin: formData.linkedin,
+        mobile: formData.mobile,
+        projectId: projectId,
+        projectName: decodeURIComponent(projectName),
+      };
+
+      await createProjectContribution(contributionData);
+      
       setIsSubmitted(true);
       setIsSubmitting(false);
 
       // Reset after delay
       setTimeout(() => {
         setIsSubmitted(false);
-        setFormData((prev) => ({
-          ...prev,
-          prLink: "",
+        setFormData({
+          name: "",
+          github: "",
+          linkedin: "",
+          mobile: "",
+          title: "",
+          description: "",
           contributionType: "",
-          whatChanged: "",
-        }));
+          experienceLevel: "",
+          timeline: "",
+          howCanHelp: "",
+        });
       }, 3000);
-    }, 1500);
+    } catch (error) {
+      console.error('Error submitting contribution:', error);
+      setIsSubmitting(false);
+      // You could show an error message here
+    }
   };
 
   return (
@@ -206,18 +265,27 @@ export default function ContributionFormPage() {
         {/* --- Header --- */}
         <div className="mb-12">
           <Link
-            href="/projects/notesbuddy"
+            href={projectId ? `/projects/${projectId}` : "/projects"}
             className="group inline-flex items-center gap-2 text-sm font-medium text-zinc-500 hover:text-white transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
-            Back to Project
+            Back to {projectName ? decodeURIComponent(projectName) : "Projects"}
           </Link>
 
-          <h1 className="text-3xl font-bold tracking-tight text-white mb-3">
-            Submit Contribution
-          </h1>
+          <div className="flex items-center gap-3 mb-3">
+            <h1 className="text-3xl font-bold tracking-tight text-white">
+              Contribute to Project
+            </h1>
+            {projectName && (
+              <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-sm font-medium">
+                📁 {decodeURIComponent(projectName)}
+              </span>
+            )}
+          </div>
           <p className="text-zinc-400 text-base">
-            Share your contribution with the community after raising a PR.
+            {projectName 
+              ? `Submit your coding contribution for ${decodeURIComponent(projectName)}.`
+              : "Submit your coding contribution to our platform."}
           </p>
         </div>
 
@@ -329,22 +397,45 @@ export default function ContributionFormPage() {
               Contribution Details
             </h3>
 
-            {/* PR Link */}
+            {/* Contribution Title */}
             <div>
-              <Label>PR Link</Label>
-              <div className="relative">
-                <GitPullRequest className="absolute left-4 top-3.5 w-4 h-4 text-zinc-500 pointer-events-none" />
-                <Input
-                  type="url"
-                  name="prLink"
-                  value={formData.prLink}
-                  onChange={handleInputChange}
-                  placeholder="https://github.com/org/repo/pull/123"
-                  className="pl-11"
-                  required
-                  error={errors.prLink}
-                />
-              </div>
+              <Label>Contribution Title</Label>
+              <Input
+                name="title"
+                value={formData.title}
+                onChange={handleInputChange}
+                placeholder="e.g. Fix login bug on mobile devices"
+                required
+                error={errors.title}
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                placeholder="Briefly describe your contribution and what it accomplishes"
+                rows={3}
+                required
+                error={errors.description}
+              />
+            </div>
+
+            {/* How You Can Help */}
+            <div>
+              <Label>How You Can Help</Label>
+              <Textarea
+                name="howCanHelp"
+                value={formData.howCanHelp}
+                onChange={handleInputChange}
+                placeholder="Describe your skills and how you can contribute to this project"
+                rows={4}
+                required
+                error={errors.howCanHelp}
+              />
             </div>
 
             {/* Contribution Type */}
@@ -394,21 +485,98 @@ export default function ContributionFormPage() {
               )}
             </div>
 
-            {/* What Changed */}
-            <div>
-              <Label>What did you change?</Label>
-              <Textarea
-                name="whatChanged"
-                value={formData.whatChanged}
-                onChange={handleInputChange}
-                placeholder="Short description – 2–3 lines"
-                rows={3}
-                required
-                error={errors.whatChanged}
-              />
-              <p className="text-xs text-zinc-600 mt-2">
-                Example: Added dark mode toggle and updated dashboard styles.
-              </p>
+            {/* Experience Level */}
+            <div className={`flex flex-col ${errors.experienceLevel ? "gap-2" : ""}`}>
+              <Label>Experience Level</Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className={`w-full bg-[#09090b] border rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:border-transparent transition-all flex items-center justify-between group ${
+                    errors.experienceLevel
+                      ? "border-red-500 focus:ring-red-500/20 hover:border-red-500"
+                      : "border-zinc-800 focus:ring-zinc-700"
+                  }`}
+                >
+                  <span
+                    className={
+                      formData.experienceLevel
+                        ? "text-white"
+                        : "text-zinc-600"
+                    }
+                  >
+                    {formData.experienceLevel || "Select experience level"}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-[#09090b] border-zinc-800 text-zinc-300">
+                  {["Beginner", "Intermediate", "Advanced", "Expert"].map((level) => (
+                    <DropdownMenuItem
+                      key={level}
+                      onClick={() =>
+                        handleSelectChange("experienceLevel", level)
+                      }
+                      className={`cursor-pointer focus:bg-zinc-800 focus:text-white my-0.5 ${formData.experienceLevel === level ? "bg-zinc-800 text-white" : ""}`}
+                    >
+                      {level}
+                      {formData.experienceLevel === level && (
+                        <Check className="w-3 h-3 ml-auto" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {errors.experienceLevel && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                  {errors.experienceLevel}
+                </p>
+              )}
+            </div>
+
+            {/* Timeline */}
+            <div className={`flex flex-col ${errors.timeline ? "gap-2" : ""}`}>
+              <Label>Timeline</Label>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className={`w-full bg-[#09090b] border rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:border-transparent transition-all flex items-center justify-between group ${
+                    errors.timeline
+                      ? "border-red-500 focus:ring-red-500/20 hover:border-red-500"
+                      : "border-zinc-800 focus:ring-zinc-700"
+                  }`}
+                >
+                  <span
+                    className={
+                      formData.timeline
+                        ? "text-white"
+                        : "text-zinc-600"
+                    }
+                  >
+                    {formData.timeline || "Select timeline"}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-[#09090b] border-zinc-800 text-zinc-300">
+                  {["Immediate", "1-2 weeks", "2-4 weeks", "1-2 months", "2+ months"].map((time) => (
+                    <DropdownMenuItem
+                      key={time}
+                      onClick={() =>
+                        handleSelectChange("timeline", time)
+                      }
+                      className={`cursor-pointer focus:bg-zinc-800 focus:text-white my-0.5 ${formData.timeline === time ? "bg-zinc-800 text-white" : ""}`}
+                    >
+                      {time}
+                      {formData.timeline === time && (
+                        <Check className="w-3 h-3 ml-auto" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              {errors.timeline && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                  {errors.timeline}
+                </p>
+              )}
             </div>
 
             <button
@@ -422,7 +590,10 @@ export default function ContributionFormPage() {
                   Submitting...
                 </>
               ) : (
-                "Submit Contribution"
+                <>
+                  <GitPullRequest className="w-4 h-4" />
+                  Submit Contribution
+                </>
               )}
             </button>
           </div>

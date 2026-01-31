@@ -228,8 +228,9 @@ export default function MarkdownEditor({
                     {children}
                   </blockquote>
                 ),
-                code: ({node, inline, children, ...props}) => 
-                  inline ? (
+                code: ({node, className, children, ...props}) => {
+                  const isInline = !className || !className.includes('language-');
+                  return isInline ? (
                     <code className="bg-zinc-800 px-2 py-1 rounded text-emerald-400 text-sm font-mono" {...props}>
                       {children}
                     </code>
@@ -237,7 +238,8 @@ export default function MarkdownEditor({
                     <code className="block bg-zinc-800 p-4 rounded-lg text-sm font-mono overflow-x-auto text-zinc-300" {...props}>
                       {children}
                     </code>
-                  ),
+                  );
+                },
                 pre: ({children}) => (
                   <pre className="bg-zinc-800 p-4 rounded-lg overflow-x-auto mb-4">
                     {children}

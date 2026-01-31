@@ -1,5 +1,3 @@
-"use client";
-
 import React, { use, useEffect, useState } from "react";
 import {
   Globe,
@@ -7,6 +5,7 @@ import {
   Lightbulb,
   GitPullRequest,
   ArrowLeft,
+  User,
   Calendar,
   Users,
   Briefcase,
@@ -17,6 +16,8 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useUser } from "@clerk/nextjs";
 import MarkdownRenderer from "@/components/MarkdownRenderer";
+import { getFeaturesByProject, ProjectFeature } from "@/lib/firebase";
+import { getContributionsByProject, ProjectContribution } from "@/lib/firebase";
 
 // --- Components ---
 
@@ -57,6 +58,8 @@ export default function ProjectDetailPage({
   const { id } = use(params);
   const { user } = useUser();
   const [project, setProject] = useState<any>(null);
+  const [approvedFeatures, setApprovedFeatures] = useState<ProjectFeature[]>([]);
+  const [approvedContributions, setApprovedContributions] = useState<ProjectContribution[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -67,6 +70,14 @@ export default function ProjectDetailPage({
 
         if (docSnap.exists()) {
           setProject({ id: docSnap.id, ...docSnap.data() });
+          
+          // Load approved features for this project
+          const features = await getFeaturesByProject(id, 'approved');
+          setApprovedFeatures(features);
+          
+          // Load approved contributions for this project
+          const contributions = await getContributionsByProject(id, 'approved');
+          setApprovedContributions(contributions);
         } else {
           console.log("No such project!");
         }
@@ -212,16 +223,16 @@ export default function ProjectDetailPage({
           {/* Compact Action Buttons */}
           <div className="flex flex-wrap items-center gap-2 pt-2">
             <Link
-              href="/feature-ideas"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold hover:bg-zinc-800 hover:text-white hover:border-zinc-700 transition-all"
+              href={`/feature-ideas?projectId=${id}&projectName=${encodeURIComponent(project.title)}`}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-sm font-semibold hover:bg-yellow-500/20 transition-all hover:scale-105 active:scale-95"
             >
               <Lightbulb className="w-3.5 h-3.5" />
               Idea
             </Link>
 
             <Link
-              href="/contribute-form"
-              className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs font-semibold hover:bg-zinc-800 hover:text-white hover:border-zinc-700 transition-all"
+              href={`/contribute-form?projectId=${id}&projectName=${encodeURIComponent(project.title)}`}
+              className="flex items-center gap-2 px-6 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-sm font-semibold hover:bg-emerald-500/20 transition-all hover:scale-105 active:scale-95"
             >
               <GitPullRequest className="w-3.5 h-3.5" />
               Contribute
@@ -303,8 +314,179 @@ export default function ProjectDetailPage({
               ),
           )}
 
-          {/* Footer */}
-          <div className="pt-10 border-t border-zinc-800 flex flex-col items-center justify-center gap-6">
+          {/* Features */}
+          {project.features && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-white mb-4 group flex items-center gap-2 cursor-default">
+                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">#</span> Features
+              </h2>
+              <div className="text-zinc-400 leading-relaxed prose prose-invert prose-li:marker:text-white pl-8">
+                <MarkdownRenderer content={project.features} />
+              </div>
+            </div>
+          )}
+
+          {/* Tech Stack */}
+          {project.techStack && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-white mb-4 group flex items-center gap-2 cursor-default">
+                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">#</span> Tech Stack
+              </h2>
+              <ul className="list-disc list-inside space-y-2 text-zinc-400 marker:text-white pl-8">
+                {typeof project.techStack === "string"
+                  ? project.techStack
+                      .split(",")
+                      .map((tech: string, i: number) => (
+                        <li key={i}>{tech.trim()}</li>
+                      ))
+                  : Array.isArray(project.techStack)
+                    ? project.techStack.map((tech: string, i: number) => (
+                        <li key={i}>{tech}</li>
+                      ))
+                    : null}
+              </ul>
+            </div>
+          )}
+
+          {/* After launch & Impact */}
+          {project.impact && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-white mb-4 group flex items-center gap-2 cursor-default">
+                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">#</span> After launch & Impact
+              </h2>
+              <div className="text-zinc-400 leading-relaxed prose prose-invert prose-li:marker:text-white pl-8">
+                <MarkdownRenderer content={project.impact} />
+              </div>
+            </div>
+          )}
+
+          {/* Future Plans */}
+          {project.futurePlans && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-white mb-4 group flex items-center gap-2 cursor-default">
+                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">#</span> Future Plans
+              </h2>
+              <div className="text-zinc-400 leading-relaxed prose prose-invert prose-li:marker:text-white pl-8">
+                <MarkdownRenderer content={project.futurePlans} />
+              </div>
+            </div>
+          )}
+
+          {/* Idea Contributors Section */}
+          {approvedFeatures.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-white mb-6 group flex items-center gap-2 cursor-default">
+                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">#</span> 
+                <Lightbulb className="w-6 h-6 text-yellow-500" />
+                Idea Contributors
+              </h2>
+              <div className="space-y-4">
+                {approvedFeatures.map((feature) => (
+                  <div key={feature.id} className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold text-white">{feature.title}</h3>
+                          <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-medium">
+                            Approved
+                          </span>
+                        </div>
+                        <p className="text-zinc-400 text-sm mb-3 line-clamp-2">{feature.description}</p>
+                        <div className="flex items-center gap-4 text-xs text-zinc-500">
+                          <div className="flex items-center gap-1">
+                            <User className="w-3 h-3" />
+                            <span className="font-medium">{feature.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {feature.createdAt?.toDate ? feature.createdAt.toDate().toLocaleDateString() : 'Unknown'}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="px-2 py-1 bg-zinc-800 rounded text-xs">{feature.category}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="px-2 py-1 bg-zinc-800 rounded text-xs">{feature.difficulty}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <a
+                          href={`https://github.com/${feature.github}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm transition-colors text-zinc-300 hover:text-white"
+                        >
+                          <Github className="w-3 h-3" />
+                          {feature.github}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Contributors Section */}
+          {approvedContributions.length > 0 && (
+            <div className="mb-12">
+              <h2 className="text-2xl font-bold text-white mb-6 group flex items-center gap-2 cursor-default">
+                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">#</span> 
+                <GitPullRequest className="w-6 h-6 text-emerald-500" />
+                Contributors
+              </h2>
+              <div className="space-y-4">
+                {approvedContributions.map((contribution) => (
+                  <div key={contribution.id} className="bg-zinc-900/30 border border-zinc-800 rounded-xl p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h3 className="text-lg font-semibold text-white">{contribution.title}</h3>
+                          <span className="px-2 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full text-xs font-medium">
+                            Approved
+                          </span>
+                        </div>
+                        <p className="text-zinc-400 text-sm mb-3 line-clamp-2">{contribution.description}</p>
+                        <div className="flex items-center gap-4 text-xs text-zinc-500">
+                          <div className="flex items-center gap-1">
+                            <User className="w-3 h-3" />
+                            <span className="font-medium">{contribution.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {contribution.createdAt?.toDate ? contribution.createdAt.toDate().toLocaleDateString() : 'Unknown'}
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="px-2 py-1 bg-zinc-800 rounded text-xs">{contribution.contributionType}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="px-2 py-1 bg-zinc-800 rounded text-xs">{contribution.experienceLevel}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="px-2 py-1 bg-zinc-800 rounded text-xs">{contribution.timeline}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <a
+                          href={`https://github.com/${contribution.github}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm transition-colors text-zinc-300 hover:text-white"
+                        >
+                          <Github className="w-3 h-3" />
+                          {contribution.github}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* --- Footer / View All Projects --- */}
+          <div className="pt-10 border-t border-zinc-800 flex flex-col items-center justify-center gap-8">
             <Link
               href="/projects"
               className="px-6 py-3 rounded-full bg-white text-black text-sm font-bold hover:bg-zinc-200 transition-colors"

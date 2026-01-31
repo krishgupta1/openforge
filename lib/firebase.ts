@@ -160,4 +160,229 @@ export async function hasUserVoted(ideaId: string, userId: string) {
   }
 }
 
+// Project Feature interface (for project-specific feature suggestions)
+export interface ProjectFeature {
+  id?: string;
+  title: string;
+  description: string;
+  category: string;
+  difficulty: string;
+  solution: string;
+  name: string;
+  github: string;
+  linkedin?: string;
+  mobile?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  projectId: string;
+  projectName: string;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
+
+// Create a new project feature
+export async function createProjectFeature(featureData: Omit<ProjectFeature, 'id' | 'createdAt' | 'updatedAt' | 'status'>) {
+  try {
+    const docRef = await addDoc(collection(db, 'projectFeatures'), {
+      ...featureData,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating project feature:', error);
+    throw error;
+  }
+}
+
+// Get all project features with optional status filter
+export async function getProjectFeatures(status?: 'pending' | 'approved' | 'rejected') {
+  try {
+    let q;
+    
+    if (status) {
+      q = query(collection(db, 'projectFeatures'), where('status', '==', status), orderBy('createdAt', 'desc'));
+    } else {
+      q = query(collection(db, 'projectFeatures'), orderBy('createdAt', 'desc'));
+    }
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as ProjectFeature[];
+  } catch (error) {
+    console.error('Error getting project features:', error);
+    throw error;
+  }
+}
+
+// Get features for a specific project
+export async function getFeaturesByProject(projectId: string, status?: 'pending' | 'approved' | 'rejected') {
+  try {
+    let q;
+    
+    if (status) {
+      q = query(
+        collection(db, 'projectFeatures'), 
+        where('projectId', '==', projectId),
+        where('status', '==', status), 
+        orderBy('createdAt', 'desc')
+      );
+    } else {
+      q = query(
+        collection(db, 'projectFeatures'), 
+        where('projectId', '==', projectId),
+        orderBy('createdAt', 'desc')
+      );
+    }
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as ProjectFeature[];
+  } catch (error) {
+    console.error('Error getting features by project:', error);
+    throw error;
+  }
+}
+
+// Update project feature status
+export async function updateProjectFeatureStatus(id: string, status: 'pending' | 'approved' | 'rejected') {
+  try {
+    const featureRef = doc(db, 'projectFeatures', id);
+    await updateDoc(featureRef, {
+      status,
+      updatedAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.error('Error updating project feature status:', error);
+    throw error;
+  }
+}
+
+// Delete a project feature
+export async function deleteProjectFeature(id: string) {
+  try {
+    await deleteDoc(doc(db, 'projectFeatures', id));
+  } catch (error) {
+    console.error('Error deleting project feature:', error);
+    throw error;
+  }
+}
+
+// Project Contribution interface (for coding contributions)
+export interface ProjectContribution {
+  id?: string;
+  title: string;
+  description: string;
+  contributionType: string;
+  experienceLevel: string;
+  timeline: string;
+  howCanHelp: string;
+  name: string;
+  github: string;
+  linkedin?: string;
+  mobile?: string;
+  status: 'pending' | 'approved' | 'rejected';
+  projectId: string;
+  projectName: string;
+  createdAt?: Timestamp;
+  updatedAt?: Timestamp;
+}
+
+// Create a new project contribution
+export async function createProjectContribution(contributionData: Omit<ProjectContribution, 'id' | 'createdAt' | 'updatedAt' | 'status'>) {
+  try {
+    const docRef = await addDoc(collection(db, 'projectContributions'), {
+      ...contributionData,
+      status: 'pending',
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error creating project contribution:', error);
+    throw error;
+  }
+}
+
+// Get all project contributions with optional status filter
+export async function getProjectContributions(status?: 'pending' | 'approved' | 'rejected') {
+  try {
+    let q;
+    
+    if (status) {
+      q = query(collection(db, 'projectContributions'), where('status', '==', status), orderBy('createdAt', 'desc'));
+    } else {
+      q = query(collection(db, 'projectContributions'), orderBy('createdAt', 'desc'));
+    }
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as ProjectContribution[];
+  } catch (error) {
+    console.error('Error getting project contributions:', error);
+    throw error;
+  }
+}
+
+// Get contributions for a specific project
+export async function getContributionsByProject(projectId: string, status?: 'pending' | 'approved' | 'rejected') {
+  try {
+    let q;
+    
+    if (status) {
+      q = query(
+        collection(db, 'projectContributions'), 
+        where('projectId', '==', projectId),
+        where('status', '==', status), 
+        orderBy('createdAt', 'desc')
+      );
+    } else {
+      q = query(
+        collection(db, 'projectContributions'), 
+        where('projectId', '==', projectId),
+        orderBy('createdAt', 'desc')
+      );
+    }
+    
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as ProjectContribution[];
+  } catch (error) {
+    console.error('Error getting contributions by project:', error);
+    throw error;
+  }
+}
+
+// Update project contribution status
+export async function updateProjectContributionStatus(id: string, status: 'pending' | 'approved' | 'rejected') {
+  try {
+    const contributionRef = doc(db, 'projectContributions', id);
+    await updateDoc(contributionRef, {
+      status,
+      updatedAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.error('Error updating project contribution status:', error);
+    throw error;
+  }
+}
+
+// Delete a project contribution
+export async function deleteProjectContribution(id: string) {
+  try {
+    await deleteDoc(doc(db, 'projectContributions', id));
+  } catch (error) {
+    console.error('Error deleting project contribution:', error);
+    throw error;
+  }
+}
+
 export { app, db };
