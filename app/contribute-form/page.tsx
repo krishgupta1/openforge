@@ -39,22 +39,48 @@ const Label = ({
 
 const Input = ({
   className = "",
+  error = "",
   ...props
-}: React.InputHTMLAttributes<HTMLInputElement>) => (
-  <input
-    className={`w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-transparent transition-all hover:border-zinc-700 ${className}`}
-    {...props}
-  />
+}: React.InputHTMLAttributes<HTMLInputElement> & { error?: string }) => (
+  <div>
+    <input
+      className={`w-full bg-[#09090b] border rounded-lg px-4 py-3.5 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all hover:border-zinc-700 ${
+        error
+          ? "border-red-500 focus:ring-red-500/20 hover:border-red-500"
+          : "border-zinc-800 focus:ring-zinc-700"
+      } ${className}`}
+      {...props}
+    />
+    {error && (
+      <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+        <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+        {error}
+      </p>
+    )}
+  </div>
 );
 
 const Textarea = ({
   className = "",
+  error = "",
   ...props
-}: React.TextareaHTMLAttributes<HTMLTextAreaElement>) => (
-  <textarea
-    className={`w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-zinc-700 focus:border-transparent transition-all hover:border-zinc-700 resize-none ${className}`}
-    {...props}
-  />
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { error?: string }) => (
+  <div>
+    <textarea
+      className={`w-full bg-[#09090b] border rounded-lg px-4 py-3 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:border-transparent transition-all hover:border-zinc-700 resize-none ${
+        error
+          ? "border-red-500 focus:ring-red-500/20 hover:border-red-500"
+          : "border-zinc-800 focus:ring-zinc-700"
+      } ${className}`}
+      {...props}
+    />
+    {error && (
+      <p className="mt-2 text-xs text-red-500 flex items-center gap-1">
+        <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+        {error}
+      </p>
+    )}
+  </div>
 );
 
 // --- Main Page Component ---
@@ -72,6 +98,7 @@ export default function ContributionFormPage() {
     continueContributing: false,
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -88,14 +115,72 @@ export default function ContributionFormPage() {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Clear error when user makes a selection
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    // PR Link validation
+    if (!formData.prLink.trim()) {
+      newErrors.prLink = "PR Link is required";
+    } else if (!/^https?:\/\/(www\.)?github\.com\/.+\/pull\/\d+/.test(formData.prLink)) {
+      newErrors.prLink = "Please enter a valid GitHub PR link";
+    }
+
+    // Contribution Type validation
+    if (!formData.contributionType) {
+      newErrors.contributionType = "Please select a contribution type";
+    }
+
+    // What Changed validation
+    if (!formData.whatChanged.trim()) {
+      newErrors.whatChanged = "Please describe what you changed";
+    } else if (formData.whatChanged.trim().length < 10) {
+      newErrors.whatChanged = "Description must be at least 10 characters";
+    } else if (formData.whatChanged.trim().length > 500) {
+      newErrors.whatChanged = "Description must be less than 500 characters";
+    }
+
+    // Optional field validations (only if filled)
+    if (formData.name && formData.name.trim().length < 2) {
+      newErrors.name = "Name must be at least 2 characters";
+    }
+
+    if (formData.github && !/^[a-zA-Z0-9]([a-zA-Z0-9-]{0,38})$/.test(formData.github)) {
+      newErrors.github = "Please enter a valid GitHub username (e.g., username)";
+    }
+
+    if (formData.linkedin && !/^in\/[a-zA-Z0-9]([a-zA-Z0-9-]{0,99})$/.test(formData.linkedin)) {
+      newErrors.linkedin = "Please enter a valid LinkedIn username (e.g., in/username)";
+    }
+
+    if (formData.mobile && !/^\+?[1-9]\d{1,14}$/.test(formData.mobile.replace(/\s/g, ""))) {
+      newErrors.mobile = "Please enter a valid mobile number";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setIsSubmitting(true);
 
     // Mock Submission
@@ -177,6 +262,7 @@ export default function ContributionFormPage() {
                     onChange={handleInputChange}
                     placeholder="e.g. John Doe"
                     className="pl-11"
+                    error={errors.name}
                   />
                 </div>
               </div>
@@ -192,6 +278,7 @@ export default function ContributionFormPage() {
                       onChange={handleInputChange}
                       placeholder="username"
                       className="pl-11"
+                      error={errors.github}
                     />
                   </div>
                 </div>
@@ -205,6 +292,7 @@ export default function ContributionFormPage() {
                       onChange={handleInputChange}
                       placeholder="in/username"
                       className="pl-11"
+                      error={errors.linkedin}
                     />
                   </div>
                 </div>
@@ -222,6 +310,7 @@ export default function ContributionFormPage() {
                     onChange={handleInputChange}
                     placeholder="+91 00000 00000"
                     className="pl-11"
+                    error={errors.mobile}
                   />
                 </div>
                 <div className="flex items-center gap-1.5 mt-2.5 text-zinc-500">
@@ -257,18 +346,23 @@ export default function ContributionFormPage() {
                   placeholder="https://github.com/org/repo/pull/123"
                   className="pl-11"
                   required
+                  error={errors.prLink}
                 />
               </div>
             </div>
 
             {/* Contribution Type */}
-            <div className="flex flex-col">
+            <div className={`flex flex-col ${errors.contributionType ? "gap-2" : ""}`}>
               <Label>Contribution Type</Label>
               <DropdownMenu>
                 <DropdownMenuTrigger>
                   <button
                     type="button"
-                    className="w-full bg-[#09090b] border border-zinc-800 rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-zinc-700 transition-all flex items-center justify-between group"
+                    className={`w-full bg-[#09090b] border rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:border-transparent transition-all flex items-center justify-between group ${
+                      errors.contributionType
+                        ? "border-red-500 focus:ring-red-500/20 hover:border-red-500"
+                        : "border-zinc-800 focus:ring-zinc-700"
+                    }`}
                   >
                     <span
                       className={
@@ -299,6 +393,12 @@ export default function ContributionFormPage() {
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
+              {errors.contributionType && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <span className="w-1 h-1 bg-red-500 rounded-full"></span>
+                  {errors.contributionType}
+                </p>
+              )}
             </div>
 
             {/* What Changed */}
@@ -311,6 +411,7 @@ export default function ContributionFormPage() {
                 placeholder="Short description – 2–3 lines"
                 rows={3}
                 required
+                error={errors.whatChanged}
               />
               <p className="text-xs text-zinc-600 mt-2">
                 Example: Added dark mode toggle and updated dashboard styles.

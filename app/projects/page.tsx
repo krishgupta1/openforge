@@ -158,9 +158,8 @@ export default function ProjectsPage() {
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
           Community Projects
         </h1>
-        <p className="text-neutral-400 text-lg leading-relaxed max-w-2xl mx-auto font-light">
-          Open-source initiatives built by developers. Explore ideas, contribute
-          code, and collaborate.
+        <p className="text-neutral-400 text-lg leading-relaxed mx-auto font-light">
+          Open-source initiatives built by developers. Explore ideas, contribute code, and collaborate.
         </p>
       </div>
 
@@ -275,7 +274,7 @@ export default function ProjectsPage() {
                     </h3>
                     <div className="min-h-[32px] flex items-center">
                       <div className="flex flex-wrap gap-2">
-                        {project.technologies.slice(0, 5).map((tech: string, i: number) => (
+                        {(Array.isArray(project.technologies) ? project.technologies.slice(0, 5) : []).map((tech: string, i: number) => (
                           <TechIcon key={i} name={tech} />
                         ))}
                       </div>
