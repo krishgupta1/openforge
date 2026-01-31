@@ -268,7 +268,7 @@ export default function ProjectsPage() {
               className="group flex flex-col bg-neutral-900/40 border border-white/5 rounded-xl overflow-hidden hover:border-white/20 transition-all duration-300"
             >
               {/* --- Image Area (Browser Mockup) --- */}
-              <div className="h-64 w-full relative overflow-hidden rounded-t-xl">
+              <div className="h-48 w-full relative overflow-hidden rounded-t-xl">
                 {project.mockupImage ? (
                   <img 
                     src={`/mockups/${project.mockupImage}`} 
@@ -301,10 +301,10 @@ export default function ProjectsPage() {
               </div>
 
               {/* --- Card Content --- */}
-              <div className="p-6 flex flex-col flex-grow">
+              <div className="p-4 flex flex-col flex-grow">
                 {/* Title & Icons */}
-                <div className="flex justify-between items-start mb-4">
-                  <h2 className="text-xl font-bold text-white tracking-tight flex-1">
+                <div className="flex justify-between items-start mb-3">
+                  <h2 className="text-lg font-bold text-white tracking-tight flex-1">
                     {project.title}
                   </h2>
                   <div className="flex gap-3 text-neutral-500 ml-4">
@@ -324,14 +324,14 @@ export default function ProjectsPage() {
                 </div>
 
                 {/* Description */}
-                <p className="text-neutral-400 text-sm leading-relaxed mb-6 min-h-[40px] line-clamp-2">
+                <p className="text-neutral-400 text-sm leading-relaxed mb-4 min-h-[32px] line-clamp-2">
                   {project.description || project.shortDescription || 'No description available'}
                 </p>
 
                 {/* Bottom Section */}
-                <div className="mt-auto space-y-4">
+                <div className="mt-auto space-y-3">
                   {/* Technology Section */}
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <div className="h-px bg-white/20 flex-1"></div>
                       <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider whitespace-nowrap">
@@ -339,7 +339,7 @@ export default function ProjectsPage() {
                       </h3>
                       <div className="h-px bg-white/20 flex-1"></div>
                     </div>
-                    <div className="min-h-[40px] flex items-center">
+                    <div className="min-h-[32px] flex items-center">
                       <div className="flex flex-wrap gap-2">
 {(() => {
                           const techArray = Array.isArray(project.technologies) 
@@ -355,7 +355,7 @@ export default function ProjectsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-white/10">
+                  <div className="flex items-center justify-between pt-3 border-t border-white/10">
                     <StatusPill status={project.status} />
 
                     <Link 

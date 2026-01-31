@@ -182,27 +182,27 @@ export default function IdeasPage() {
                 className="group flex flex-col bg-neutral-900/40 border border-white/5 rounded-xl overflow-hidden hover:border-white/20 transition-all duration-300"
               >
                 {/* Card Content Area - Increased Padding to Match Projects Page */}
-                <div className="p-8 flex flex-col flex-grow h-full">
+                <div className="p-4 flex flex-col flex-grow h-full">
                   {/* Meta Row */}
-                  <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center justify-between mb-3">
                     <TypeBadge type="New Project" />
                     <StatusPill status="Open" />
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-xl font-bold text-white tracking-tight mb-3 group-hover:text-neutral-200 transition-colors">
+                  <h3 className="text-lg font-bold text-white tracking-tight mb-2 group-hover:text-neutral-200 transition-colors">
                     {idea.title}
                   </h3>
 
                   {/* Description */}
-                  <p className="text-neutral-400 text-sm leading-relaxed mb-8 flex-grow line-clamp-3">
+                  <p className="text-neutral-400 text-sm leading-relaxed mb-4 flex-grow line-clamp-3">
                     {idea.problem}
                   </p>
 
                   {/* Bottom Section */}
-                  <div className="mt-auto space-y-6">
+                  <div className="mt-auto space-y-3">
                     {/* Tags */}
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
                         Tags
                       </h3>
@@ -214,7 +214,7 @@ export default function IdeasPage() {
                     </div>
 
                     {/* Footer / Author */}
-                    <div className="flex items-center justify-between pt-5 border-t border-white/5">
+                    <div className="flex items-center justify-between pt-3 border-t border-white/5">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center border border-neutral-700 text-xs font-bold text-neutral-400">
                           {idea.name.charAt(0)}
