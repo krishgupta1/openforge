@@ -91,7 +91,6 @@ export default function FeatureIdeaPage() {
     featureDescription: "",
     featureType: "",
     priority: "",
-    wantToWorkOn: false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -419,55 +418,11 @@ export default function FeatureIdeaPage() {
                   </DropdownMenu>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* Group 3: Action & Submit */}
-          <div className="pt-4">
-            <div
-              onClick={() =>
-                setFormData((prev) => ({
-                  ...prev,
-                  wantToWorkOn: !prev.wantToWorkOn,
-                }))
-              }
-              className={`group flex items-start gap-4 p-5 rounded-xl border cursor-pointer transition-all duration-200 ${
-                formData.wantToWorkOn
-                  ? "bg-zinc-900 border-zinc-700"
-                  : "bg-transparent border-zinc-800 hover:border-zinc-700"
-              }`}
-            >
-              <div
-                className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-colors shadow-sm ${
-                  formData.wantToWorkOn
-                    ? "bg-white border-white text-black"
-                    : "bg-[#09090b] border-zinc-700 group-hover:border-zinc-500"
-                }`}
-              >
-                {formData.wantToWorkOn && (
-                  <Check className="w-3.5 h-3.5" strokeWidth={3} />
-                )}
-              </div>
-
-              <div className="flex flex-col select-none">
-                <span
-                  className={`text-sm font-medium transition-colors ${
-                    formData.wantToWorkOn ? "text-white" : "text-zinc-300"
-                  }`}
-                >
-                  I want to contribute to this feature
-                </span>
-                <span className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                  Check this box if you are interested in actively building this
-                  feature yourself. We will tag you on the GitHub issue.
-                </span>
-              </div>
-            </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-8 w-full bg-white text-black text-sm font-bold py-4 rounded-lg hover:bg-zinc-200 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-white text-black text-sm font-bold py-4 rounded-lg hover:bg-zinc-200 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -478,6 +433,7 @@ export default function FeatureIdeaPage() {
               )}
             </button>
           </div>
+        </div>
         </form>
       </div>
     </div>

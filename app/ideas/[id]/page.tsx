@@ -314,9 +314,12 @@ export default function IdeaDetailPage() {
 
               <div className="pt-4 border-t border-zinc-800/50">
                 <h4 className="text-xs font-medium text-zinc-500 mb-3 uppercase tracking-wider">Collaboration</h4>
-                <button className="w-full py-3 rounded-lg border border-dashed border-zinc-700 text-zinc-400 text-sm hover:border-zinc-500 hover:text-white transition-all">
+                <Link 
+                  href={`/ideas/${params.id}/request-join`}
+                  className="w-full py-3 rounded-lg border border-dashed border-zinc-700 text-zinc-400 text-sm hover:border-zinc-500 hover:text-white transition-all flex items-center justify-center"
+                >
                   👋 Request to Join Project
-                </button>
+                </Link>
               </div>
             </div>
 

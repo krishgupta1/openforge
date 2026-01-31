@@ -94,8 +94,6 @@ export default function ContributionFormPage() {
     prLink: "",
     contributionType: "",
     whatChanged: "",
-    relatedFeature: "",
-    continueContributing: false,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -197,8 +195,6 @@ export default function ContributionFormPage() {
           prLink: "",
           contributionType: "",
           whatChanged: "",
-          relatedFeature: "",
-          continueContributing: false,
         }));
       }, 3000);
     }, 1500);
@@ -355,26 +351,23 @@ export default function ContributionFormPage() {
             <div className={`flex flex-col ${errors.contributionType ? "gap-2" : ""}`}>
               <Label>Contribution Type</Label>
               <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <button
-                    type="button"
-                    className={`w-full bg-[#09090b] border rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:border-transparent transition-all flex items-center justify-between group ${
-                      errors.contributionType
-                        ? "border-red-500 focus:ring-red-500/20 hover:border-red-500"
-                        : "border-zinc-800 focus:ring-zinc-700"
-                    }`}
+                <DropdownMenuTrigger
+                  className={`w-full bg-[#09090b] border rounded-lg px-4 py-3.5 text-sm text-left hover:border-zinc-700 focus:outline-none focus:ring-2 focus:border-transparent transition-all flex items-center justify-between group ${
+                    errors.contributionType
+                      ? "border-red-500 focus:ring-red-500/20 hover:border-red-500"
+                      : "border-zinc-800 focus:ring-zinc-700"
+                  }`}
+                >
+                  <span
+                    className={
+                      formData.contributionType
+                        ? "text-white"
+                        : "text-zinc-600"
+                    }
                   >
-                    <span
-                      className={
-                        formData.contributionType
-                          ? "text-white"
-                          : "text-zinc-600"
-                      }
-                    >
-                      {formData.contributionType || "Select contribution type"}
-                    </span>
-                    <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
-                  </button>
+                    {formData.contributionType || "Select contribution type"}
+                  </span>
+                  <ChevronDown className="w-4 h-4 text-zinc-500 group-hover:text-zinc-400 transition-colors" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] bg-[#09090b] border-zinc-800 text-zinc-300">
                   {contributionTypes.map((type) => (
@@ -418,74 +411,10 @@ export default function ContributionFormPage() {
               </p>
             </div>
 
-            {/* Related Feature */}
-            <div>
-              <Label>
-                Related Feature / Issue{" "}
-                <span className="text-zinc-600 font-normal ml-1">
-                  (Optional)
-                </span>
-              </Label>
-              <Input
-                name="relatedFeature"
-                value={formData.relatedFeature}
-                onChange={handleInputChange}
-                placeholder="Feature idea / Issue ID"
-              />
-              <p className="text-xs text-zinc-600 mt-2">
-                Auto-linked if PR came from feature card.
-              </p>
-            </div>
-          </div>
-
-          {/* Action & Submit */}
-          <div className="pt-4">
-            <div
-              onClick={() =>
-                setFormData((prev) => ({
-                  ...prev,
-                  continueContributing: !prev.continueContributing,
-                }))
-              }
-              className={`group flex items-start gap-4 p-5 rounded-xl border cursor-pointer transition-all duration-200 ${
-                formData.continueContributing
-                  ? "bg-zinc-900 border-zinc-700"
-                  : "bg-transparent border-zinc-800 hover:border-zinc-700"
-              }`}
-            >
-              <div
-                className={`mt-0.5 w-5 h-5 rounded border flex items-center justify-center transition-colors shadow-sm ${
-                  formData.continueContributing
-                    ? "bg-white border-white text-black"
-                    : "bg-[#09090b] border-zinc-700 group-hover:border-zinc-500"
-                }`}
-              >
-                {formData.continueContributing && (
-                  <Check className="w-3.5 h-3.5" strokeWidth={3} />
-                )}
-              </div>
-
-              <div className="flex flex-col select-none">
-                <span
-                  className={`text-sm font-medium transition-colors ${
-                    formData.continueContributing
-                      ? "text-white"
-                      : "text-zinc-300"
-                  }`}
-                >
-                  I want to continue contributing
-                </span>
-                <span className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                  Check this if you'd like to be assigned more related tasks in
-                  the future.
-                </span>
-              </div>
-            </div>
-
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-8 w-full bg-white text-black text-sm font-bold py-4 rounded-lg hover:bg-zinc-200 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-white text-black text-sm font-bold py-4 rounded-lg hover:bg-zinc-200 transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
