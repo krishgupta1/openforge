@@ -36,7 +36,7 @@ export default function EditProject({ params }: { params: Promise<{ id: string }
             "title", "shortDescription", "status", "timeline", "role", "team", 
             "techStack", "githubUrl", "liveUrl", "mockupImage", "overview", 
             "features", "whatUsersCanDo", "whyIBuiltThis", "impact", 
-            "futurePlans", "motivation"
+            "futurePlans"
           ];
           
           // Order fields: first the predefined ones in order, then any additional ones alphabetically
@@ -135,7 +135,7 @@ export default function EditProject({ params }: { params: Promise<{ id: string }
                   <label className="block text-sm font-medium text-zinc-300 mb-2">
                     {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
                   </label>
-                  {key === "description" || key === "shortDescription" || key === "overview" || key === "whatUsersCanDo" || key === "whyIBuiltThis" || key === "impact" || key === "futurePlans" || key === "features" || key === "motivation" ? (
+                  {key === "description" || key === "shortDescription" || key === "overview" || key === "whatUsersCanDo" || key === "whyIBuiltThis" || key === "impact" || key === "futurePlans" || key === "features" ? (
                     <div>
                       <MarkdownEditor
                         value={form[key] || ""}
@@ -143,7 +143,7 @@ export default function EditProject({ params }: { params: Promise<{ id: string }
                         placeholder={`Enter ${key.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
                         height={key === "overview" || key === "whatUsersCanDo" || key === "whyIBuiltThis" ? "300px" : "200px"}
                       />
-                      {(key === "whatUsersCanDo" || key === "features" || key === "motivation" || key === "impact" || key === "futurePlans") && (
+                      {(key === "whatUsersCanDo" || key === "features" || key === "impact" || key === "futurePlans") && (
                         <p className="text-xs text-zinc-500 mt-2">
                           Use markdown formatting. Supports headings, lists, links, code blocks, and more.
                         </p>
