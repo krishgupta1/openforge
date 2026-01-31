@@ -7,6 +7,7 @@ import { useUser } from "@clerk/nextjs";
 import { isAdmin } from "@/lib/isAdmin";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import MarkdownEditor from "@/components/MarkdownEditor";
 
 export default function NewProject() {
   const { user } = useUser();
@@ -29,22 +30,53 @@ export default function NewProject() {
           snapshot.docs.forEach(doc => {
             Object.keys(doc.data()).forEach(key => allFields.add(key));
           });
-          setAvailableFields(Array.from(allFields).sort());
+          
+          // Define logical order for fields
+          const fieldOrder = [
+            "title", "shortDescription", "status", "timeline", "role", "team", 
+            "techStack", "githubUrl", "liveUrl", "mockupImage", "overview", 
+            "features", "whatUsersCanDo", "whyIBuiltThis", "impact", 
+            "futurePlans", "motivation"
+          ];
+          
+          // Order fields: first the predefined ones in order, then any additional ones alphabetically
+          const orderedFields = [
+            ...fieldOrder.filter(field => allFields.has(field)),
+            ...Array.from(allFields).filter(field => !fieldOrder.includes(field)).sort()
+          ];
+          setAvailableFields(orderedFields);
           
           // Initialize form with empty values for available fields
           const initialForm: any = {};
-          allFields.forEach(field => {
+          orderedFields.forEach(field => {
             initialForm[field] = "";
           });
           setForm(initialForm);
         } else {
-          // If no projects exist, show basic fields
-          const basicFields = ["title", "description", "status", "category"];
-          setAvailableFields(basicFields);
+          // If no projects exist, show fields in logical order
+          const orderedFields = [
+            "title", 
+            "shortDescription", 
+            "status", 
+            "timeline", 
+            "role", 
+            "team", 
+            "techStack", 
+            "githubUrl", 
+            "liveUrl", 
+            "mockupImage",
+            "overview",
+            "features",
+            "whatUsersCanDo",
+            "whyIBuiltThis",
+            "impact",
+            "futurePlans",
+            "motivation"
+          ];
+          setAvailableFields(orderedFields);
           const initialForm: any = {};
-          basicFields.forEach(field => {
-            initialForm[field] = field === "status" ? "Open for Contributions" : 
-                               field === "category" ? "Working" : "";
+          orderedFields.forEach(field => {
+            initialForm[field] = field === "status" ? "Open for Contributions" : "";
           });
           setForm(initialForm);
         }
@@ -54,6 +86,37 @@ export default function NewProject() {
     }
     loadAvailableFields();
   }, []);
+
+  // Auto-bullet functionality for textareas
+  const handleTextareaChange = (key: string, value: string) => {
+    // Check if the last action was pressing Enter
+    const lines = value.split('\n');
+    if (lines.length > 1) {
+      const lastLine = lines[lines.length - 1];
+      const secondLastLine = lines[lines.length - 2];
+      
+      // If the previous line was a bullet point and the new line is empty, add a bullet
+      if (lastLine === '' && (secondLastLine.startsWith('•') || secondLastLine.startsWith('-') || /^\d+\./.test(secondLastLine))) {
+        // Extract the bullet style from the previous line
+        let bullet = '• ';
+        if (secondLastLine.startsWith('-')) {
+          bullet = '- ';
+        } else if (/^\d+\./.test(secondLastLine)) {
+          const match = secondLastLine.match(/^(\d+)\./);
+          if (match) {
+            const nextNumber = parseInt(match[1]) + 1;
+            bullet = `${nextNumber}. `;
+          }
+        }
+        
+        // Add bullet to the new line
+        lines[lines.length - 1] = bullet;
+        value = lines.join('\n');
+      }
+    }
+    
+    setForm({ ...form, [key]: value });
+  };
 
   const handleSubmit = async () => {
     await addDoc(collection(db, "projects"), {
@@ -99,18 +162,15 @@ export default function NewProject() {
                   </label>
                   {key === "description" || key === "shortDescription" || key === "overview" || key === "whatUsersCanDo" || key === "whyIBuiltThis" || key === "impact" || key === "futurePlans" || key === "features" || key === "motivation" ? (
                     <div>
-                      <textarea
-                        placeholder={`Enter ${key.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
-                        className="w-full px-4 py-3 bg-neutral-900/50 border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors resize-none"
-                        rows={key === "overview" || key === "whatUsersCanDo" || key === "whyIBuiltThis" ? 6 : 4}
+                      <MarkdownEditor
                         value={form[key] || ""}
-                        onChange={(e) =>
-                          setForm({ ...form, [key]: e.target.value })
-                        }
+                        onChange={(value) => setForm({ ...form, [key]: value })}
+                        placeholder={`Enter ${key.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
+                        height={key === "overview" || key === "whatUsersCanDo" || key === "whyIBuiltThis" ? "300px" : "200px"}
                       />
                       {(key === "whatUsersCanDo" || key === "features" || key === "motivation" || key === "impact" || key === "futurePlans") && (
                         <p className="text-xs text-zinc-500 mt-2">
-                          Use bullet points or numbered lists. Each point on a new line.
+                          Use markdown formatting. Supports headings, lists, links, code blocks, and more.
                         </p>
                       )}
                     </div>
@@ -127,6 +187,92 @@ export default function NewProject() {
                       />
                       <p className="text-xs text-zinc-500 mt-2">
                         Enter technologies separated by commas
+                      </p>
+                    </div>
+                  ) : key === "timeline" ? (
+                    <div>
+                      <input
+                        type="text"
+                        placeholder="e.g., 2 months, 3 weeks, 6 months"
+                        className="w-full px-4 py-3 bg-neutral-900/50 border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
+                        value={form[key] || ""}
+                        onChange={(e) =>
+                          setForm({ ...form, [key]: e.target.value })
+                        }
+                      />
+                      <p className="text-xs text-zinc-500 mt-2">
+                        Duration of the project
+                      </p>
+                    </div>
+                  ) : key === "role" ? (
+                    <div>
+                      <select
+                        className="w-full px-4 py-3 bg-neutral-900/50 border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
+                        value={form[key] || ""}
+                        onChange={(e) =>
+                          setForm({ ...form, [key]: e.target.value })
+                        }
+                      >
+                        <option value="">Select role</option>
+                        <option value="Full Stack">Full Stack</option>
+                        <option value="Frontend">Frontend</option>
+                        <option value="Backend">Backend</option>
+                        <option value="UI/UX">UI/UX</option>
+                        <option value="DevOps">DevOps</option>
+                        <option value="Mobile">Mobile</option>
+                      </select>
+                      <p className="text-xs text-zinc-500 mt-2">
+                        Your primary role in the project
+                      </p>
+                    </div>
+                  ) : key === "team" ? (
+                    <div>
+                      <select
+                        className="w-full px-4 py-3 bg-neutral-900/50 border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
+                        value={form[key] || ""}
+                        onChange={(e) =>
+                          setForm({ ...form, [key]: e.target.value })
+                        }
+                      >
+                        <option value="">Select team size</option>
+                        <option value="Solo">Solo</option>
+                        <option value="2-3 people">2-3 people</option>
+                        <option value="4-6 people">4-6 people</option>
+                        <option value="7-10 people">7-10 people</option>
+                        <option value="10+ people">10+ people</option>
+                      </select>
+                      <p className="text-xs text-zinc-500 mt-2">
+                        Team size for the project
+                      </p>
+                    </div>
+                  ) : key === "githubUrl" ? (
+                    <div>
+                      <input
+                        type="url"
+                        placeholder="https://github.com/username/repo"
+                        className="w-full px-4 py-3 bg-neutral-900/50 border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
+                        value={form[key] || ""}
+                        onChange={(e) =>
+                          setForm({ ...form, [key]: e.target.value })
+                        }
+                      />
+                      <p className="text-xs text-zinc-500 mt-2">
+                        GitHub repository URL
+                      </p>
+                    </div>
+                  ) : key === "liveUrl" ? (
+                    <div>
+                      <input
+                        type="url"
+                        placeholder="https://your-project-url.com"
+                        className="w-full px-4 py-3 bg-neutral-900/50 border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
+                        value={form[key] || ""}
+                        onChange={(e) =>
+                          setForm({ ...form, [key]: e.target.value })
+                        }
+                      />
+                      <p className="text-xs text-zinc-500 mt-2">
+                        Live demo URL (optional)
                       </p>
                     </div>
                   ) : key === "mockupImage" ? (

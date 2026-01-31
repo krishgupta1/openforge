@@ -30,7 +30,7 @@ export async function trackProjectView(projectId: string, userId?: string) {
     // Optionally track detailed view analytics in a separate collection
     const viewRecord: ViewRecord = {
       userId,
-      timestamp: serverTimestamp(),
+      timestamp: new Date(),
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : undefined,
       ip: typeof window !== 'undefined' ? await getClientIP() : undefined
     };

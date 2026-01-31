@@ -7,6 +7,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { trackProjectView } from "@/lib/viewTracking";
 import { useUser } from "@clerk/nextjs";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 // --- Components ---
 
@@ -218,9 +219,7 @@ export default function ProjectDetailPage({
           {project.overview && (
             <div className="mb-16">
               <SectionHeading>Overview</SectionHeading>
-              <p className="text-zinc-400 leading-relaxed whitespace-pre-line">
-                {project.overview}
-              </p>
+              <MarkdownRenderer content={project.overview} />
             </div>
           )}
 
@@ -228,20 +227,7 @@ export default function ProjectDetailPage({
           {project.whatUsersCanDo && (
             <div className="mb-16">
               <SectionHeading>What Users Can Do</SectionHeading>
-              <div className="text-zinc-400 leading-relaxed whitespace-pre-line">
-                {project.whatUsersCanDo.split('\n').map((line: string, index: number) => (
-                  <div key={index} className="mb-3">
-                    {line.startsWith('•') || line.startsWith('-') || /^\d+\./.test(line) ? (
-                      <div className="flex items-start">
-                        <span className="mr-2">{line.split(':')[0]}:</span>
-                        <span>{line.split(':').slice(1).join(':')}</span>
-                      </div>
-                    ) : (
-                      <span>{line}</span>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <MarkdownRenderer content={project.whatUsersCanDo} />
             </div>
           )}
 
@@ -249,17 +235,7 @@ export default function ProjectDetailPage({
           {project.whyIBuiltThis && (
             <div className="mb-16">
               <SectionHeading>Why I built this</SectionHeading>
-              <div className="text-zinc-400 leading-relaxed whitespace-pre-line">
-                {project.whyIBuiltThis.split('\n').map((line: string, index: number) => (
-                  <div key={index} className="mb-2">
-                    {line.startsWith('•') || line.startsWith('-') || /^\d+\./.test(line) ? (
-                      <li className="list-disc ml-6">{line.replace(/^[•\-\d\.]\s*/, '')}</li>
-                    ) : (
-                      <p>{line}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <MarkdownRenderer content={project.whyIBuiltThis} />
             </div>
           )}
 
@@ -267,17 +243,7 @@ export default function ProjectDetailPage({
           {project.features && (
             <div className="mb-16">
               <SectionHeading>Features</SectionHeading>
-              <div className="text-zinc-400 leading-relaxed whitespace-pre-line">
-                {project.features.split('\n').map((line: string, index: number) => (
-                  <div key={index} className="mb-2">
-                    {line.startsWith('•') || line.startsWith('-') || /^\d+\./.test(line) ? (
-                      <li className="list-disc ml-6">{line.replace(/^[•\-\d\.]\s*/, '')}</li>
-                    ) : (
-                      <p>{line}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <MarkdownRenderer content={project.features} />
             </div>
           )}
 
@@ -286,11 +252,15 @@ export default function ProjectDetailPage({
             <div className="mb-16">
               <SectionHeading>Tech Stack</SectionHeading>
               <div className="flex flex-wrap gap-2">
-                {project.techStack.split(',').map((tech: string, i: number) => (
+                {typeof project.techStack === 'string' ? project.techStack.split(',').map((tech: string, i: number) => (
                   <span key={i} className="px-3 py-1 bg-zinc-900/50 border border-zinc-800 text-zinc-300 text-sm rounded-lg">
                     {tech.trim()}
                   </span>
-                ))}
+                )) : Array.isArray(project.techStack) ? project.techStack.map((tech: string, i: number) => (
+                  <span key={i} className="px-3 py-1 bg-zinc-900/50 border border-zinc-800 text-zinc-300 text-sm rounded-lg">
+                    {tech}
+                  </span>
+                )) : null}
               </div>
             </div>
           )}
@@ -299,17 +269,7 @@ export default function ProjectDetailPage({
           {project.impact && (
             <div className="mb-16">
               <SectionHeading>After launch & Impact</SectionHeading>
-              <div className="text-zinc-400 leading-relaxed whitespace-pre-line">
-                {project.impact.split('\n').map((line: string, index: number) => (
-                  <div key={index} className="mb-2">
-                    {line.startsWith('•') || line.startsWith('-') || /^\d+\./.test(line) ? (
-                      <li className="list-disc ml-6">{line.replace(/^[•\-\d\.]\s*/, '')}</li>
-                    ) : (
-                      <p>{line}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <MarkdownRenderer content={project.impact} />
             </div>
           )}
 
@@ -317,17 +277,7 @@ export default function ProjectDetailPage({
           {project.futurePlans && (
             <div className="mb-16">
               <SectionHeading>Future Plans</SectionHeading>
-              <div className="text-zinc-400 leading-relaxed whitespace-pre-line">
-                {project.futurePlans.split('\n').map((line: string, index: number) => (
-                  <div key={index} className="mb-2">
-                    {line.startsWith('•') || line.startsWith('-') || /^\d+\./.test(line) ? (
-                      <li className="list-disc ml-6">{line.replace(/^[•\-\d\.]\s*/, '')}</li>
-                    ) : (
-                      <p>{line}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <MarkdownRenderer content={project.futurePlans} />
             </div>
           )}
 
@@ -335,17 +285,7 @@ export default function ProjectDetailPage({
           {project.motivation && (
             <div className="mb-16">
               <SectionHeading>Motivation</SectionHeading>
-              <div className="text-zinc-400 leading-relaxed whitespace-pre-line">
-                {project.motivation.split('\n').map((line: string, index: number) => (
-                  <div key={index} className="mb-2">
-                    {line.startsWith('•') || line.startsWith('-') || /^\d+\./.test(line) ? (
-                      <li className="list-disc ml-6">{line.replace(/^[•\-\d\.]\s*/, '')}</li>
-                    ) : (
-                      <p>{line}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+              <MarkdownRenderer content={project.motivation} />
             </div>
           )}
 

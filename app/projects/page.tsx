@@ -10,38 +10,105 @@ import { db } from "@/lib/firebase";
 
 const TechIcon = ({ name }: { name: string }) => {
   const logoMap: { [key: string]: string } = {
+    // Frontend
     React: "react.png",
-    TypeScript: "typescript.png",
-    Python: "python.png",
     "Next.js": "nextjs2.png",
-    Tailwind: "tailwindcss.png",
-    Bun: "bunjs.png",
-    Vercel: "vercel.png",
-    Supabase: "supabase.png",
-    Solidity: "solidity.png",
-    GraphQL: "graphql.png",
-    WebGL: "threejs.png",
-    Rust: "rust.png",
-    WASM: "webassembly.png",
-    Go: "go.png",
-    WebRTC: "webrtc.png",
-    Docker: "docker.png",
-    Swift: "swift.png",
-    ARKit: "arkit.png",
-    "Node.js": "nodejs.png",
-    TensorFlow: "pytorch.png",
-    AWS: "aws.png",
+    Vue: "vuejs.png",
+    Angular: "angular.png",
     Svelte: "sveltejs.png",
+    TypeScript: "typescript.png",
+    JavaScript: "js.png",
+    HTML5: "html5.png",
+    CSS3: "css3.png",
+    Tailwind: "tailwindcss.png",
+    Bootstrap: "bootstrap5.png",
+    MaterialUI: "materialui.png",
+    ChakraUI: "chakraui.png",
+    shadcn: "shadcnui.png",
+    
+    // Backend
+    "Node.js": "nodejs.png",
+    Python: "python.png",
+    Java: "java.png",
+    "C#": "csharp.png",
+    PHP: "php.png",
+    Ruby: "ruby.png",
+    Go: "go.png",
+    Rust: "rust.png",
+    Swift: "swift.png",
+    Kotlin: "kotlin.png",
+    Dart: "dart.png",
+    Elixir: "elixir.png",
+    Clojure: "clojure.png",
+    Haskell: "haskell.png",
+    
+    // Databases
+    PostgreSQL: "postgresql.png",
+    MySQL: "mysql.png",
+    MongoDB: "mongodb.png",
+    Redis: "redis.png",
+    SQLite: "sqlite.png",
+    Elasticsearch: "elastic.png",
+    
+    // Cloud & DevOps
+    AWS: "aws.png",
+    Google: "google.png",
+    Azure: "azure.png",
+    Vercel: "vercel.png",
+    Netlify: "netlify.png",
+    Heroku: "heroku.png",
+    DigitalOcean: "digitalocean.png",
+    Cloudflare: "cloudflare.png",
+    Docker: "docker.png",
+    Kubernetes: "kubernetes.png",
+    Terraform: "terraform.png",
+    
+    // Tools & Libraries
+    Git: "git.png",
+    GitHub: "github.png",
+    GitLab: "gitlab.png",
+    NPM: "npm.png",
+    Yarn: "yarn.png",
+    Webpack: "webpack.png",
     Vite: "vitejs.png",
+    Babel: "babel.png",
+    ESLint: "eslint.png",
+    Prettier: "prettier.png",
+    Jest: "jest.png",
+    Cypress: "cypress.png",
+    Playwright: "playwright.png",
+    
+    // AI/ML
+    OpenAI: "openai.png",
+    TensorFlow: "tensorflow.png",
+    PyTorch: "pytorch.png",
+    HuggingFace: "huggingface.png",
+    
+    // Mobile
+    "React Native": "reactnative.png",
+    Flutter: "flutter.png",
+    
+    // Blockchain
+    Solidity: "solidity.png",
+    "Web3.js": "web3js.png",
+    
+    // Other
+    GraphQL: "graphql.png",
+    ThreeJS: "threejs.png",
+    WebSocket: "websocket.png",
+    FFmpeg: "ffmpeg.png",
+    Supabase: "supabase.png",
+    Firebase: "firebase.png",
+    Figma: "figma.png",
+    VSCode: "vscode.png",
+    
+    // Legacy mappings for compatibility
+    Bun: "bunjs.png",
+    WASM: "webassembly.png",
+    WebGL: "threejs.png",
     Linux: "linux.png",
     "D3.js": "d3js.png",
     FastAPI: "fastapi.png",
-    Kubernetes: "kubernetes.png",
-    "React Native": "reactnative.png",
-    MongoDB: "mongodb.png",
-    "Web3.js": "web3js.png",
-    FFmpeg: "ffmpeg.png",
-    WebSocket: "websocket.png",
   };
 
   const logoFile = logoMap[name];
@@ -118,6 +185,7 @@ export default function ProjectsPage() {
       try {
         const snapshot = await getDocs(collection(db, "projects"));
         const projectsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        console.log("Loaded projects:", projectsData); // Debug log
         setProjects(projectsData);
       } catch (error) {
         console.error("Error loading projects:", error);
@@ -193,33 +261,30 @@ export default function ProjectsPage() {
 
         {/* --- Projects Grid --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredProjects.map((project, index) => (
+          {filteredProjects.map((project, index) => {
+            console.log(`Project ${index}:`, project); // Debug log for each project
+            return (
             <div
               key={index}
               className="group flex flex-col bg-neutral-900/40 border border-white/5 rounded-xl overflow-hidden hover:border-white/20 transition-all duration-300"
             >
               {/* --- Image Area (Browser Mockup) --- */}
-              <div className="h-56 w-full relative overflow-hidden flex items-end justify-center px-8 pt-10">
+              <div className="h-64 w-full relative overflow-hidden rounded-t-xl">
                 {project.mockupImage ? (
                   <img 
                     src={`/mockups/${project.mockupImage}`} 
                     alt={`${project.title} mockup`}
-                    className="w-full h-full object-cover rounded-t-lg shadow-2xl border border-white/10"
+                    className="w-full h-full object-cover rounded-t-xl shadow-2xl border border-white/10"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
                       const parent = target.parentElement;
                       if (parent) {
                         parent.innerHTML = `
-                          <div class="w-full h-full bg-gradient-to-br ${project.gradient || 'from-neutral-800 to-neutral-900'} rounded-t-lg shadow-2xl border border-white/10 flex flex-col transform translate-y-4 group-hover:translate-y-2 transition-transform duration-500 ease-out">
-                            <div class="h-8 border-b border-white/5 flex items-center px-4 gap-1.5 bg-white/5">
-                              <div class="w-2.5 h-2.5 rounded-full bg-white/10"></div>
-                              <div class="w-2.5 h-2.5 rounded-full bg-white/10"></div>
-                              <div class="w-2.5 h-2.5 rounded-full bg-white/10"></div>
-                            </div>
-                            <div class="flex-1 p-6 flex flex-col items-center justify-center text-center">
-                              <h3 class="text-lg font-bold text-white tracking-tight">${project.title}</h3>
-                              <p class="text-[10px] font-mono text-neutral-600 mt-2">${project.version || 'v1.0.0'}</p>
+                          <div class="w-full h-full bg-gradient-to-br ${project.gradient || 'from-purple-600 to-pink-600'} rounded-t-xl shadow-2xl border border-white/10 flex flex-col items-center justify-center p-8">
+                            <div class="text-white text-center">
+                              <h3 class="text-2xl font-bold mb-2">${project.title}</h3>
+                              <p class="text-sm opacity-90">${project.description || 'Your all-in-one learning platform'}</p>
                             </div>
                           </div>
                         `;
@@ -227,62 +292,71 @@ export default function ProjectsPage() {
                     }}
                   />
                 ) : (
-                  <div className={`w-full h-full bg-gradient-to-br ${project.gradient || 'from-neutral-800 to-neutral-900'} rounded-t-lg shadow-2xl border border-white/10 flex flex-col transform translate-y-4 group-hover:translate-y-2 transition-transform duration-500 ease-out`}>
-                    {/* Window Bar - Professional Monochrome */}
-                    <div className="h-8 border-b border-white/5 flex items-center px-4 gap-1.5 bg-white/5">
-                      <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-white/10"></div>
-                    </div>
-
-                    {/* Window Body */}
-                    <div className="flex-1 p-6 flex flex-col items-center justify-center text-center">
-                      <h3 className="text-lg font-bold text-white tracking-tight">
-                        {project.title}
-                      </h3>
-                      <p className="text-[10px] font-mono text-neutral-600 mt-2">
-                        {project.version || "v1.0.0"}
-                      </p>
+                  <div className={`w-full h-full bg-gradient-to-br ${project.gradient || 'from-purple-600 to-pink-600'} rounded-t-xl shadow-2xl border border-white/10 flex flex-col items-center justify-center p-8`}>
+                    <div className="text-white text-center">
+                      <h3 className="text-2xl font-bold mb-2">{project.title}</h3>
+                      <p className="text-sm opacity-90">{project.description || 'Your all-in-one learning platform'}</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* --- Card Content --- */}
-              <div className="p-8 flex flex-col flex-grow">
+              <div className="p-6 flex flex-col flex-grow">
                 {/* Title & Icons */}
                 <div className="flex justify-between items-start mb-4">
-                  <h2 className="text-xl font-bold text-white tracking-tight">
+                  <h2 className="text-xl font-bold text-white tracking-tight flex-1">
                     {project.title}
                   </h2>
-                  <div className="flex gap-3 text-neutral-500">
-                    <Globe className="w-4 h-4 hover:text-white cursor-pointer transition-colors" />
-                    <Github className="w-4 h-4 hover:text-white cursor-pointer transition-colors" />
+                  <div className="flex gap-3 text-neutral-500 ml-4">
+                    {project.liveUrl && (
+                      <Globe 
+                        className="w-4 h-4 hover:text-white cursor-pointer transition-colors" 
+                        onClick={() => window.open(project.liveUrl, '_blank')}
+                      />
+                    )}
+                    {project.githubUrl && (
+                      <Github 
+                        className="w-4 h-4 hover:text-white cursor-pointer transition-colors" 
+                        onClick={() => window.open(project.githubUrl, '_blank')}
+                      />
+                    )}
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-neutral-400 text-sm leading-relaxed mb-8 min-h-[40px]">
-                  {project.description}
+                <p className="text-neutral-400 text-sm leading-relaxed mb-6 min-h-[40px] line-clamp-2">
+                  {project.description || project.shortDescription || 'No description available'}
                 </p>
 
                 {/* Bottom Section */}
-                <div className="mt-auto space-y-6">
+                <div className="mt-auto space-y-4">
                   {/* Technology Section */}
                   <div className="space-y-3">
-                    <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
-                      Technology
-                    </h3>
-                    <div className="min-h-[32px] flex items-center">
+                    <div className="flex items-center gap-2">
+                      <div className="h-px bg-white/20 flex-1"></div>
+                      <h3 className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider whitespace-nowrap">
+                        Technology
+                      </h3>
+                      <div className="h-px bg-white/20 flex-1"></div>
+                    </div>
+                    <div className="min-h-[40px] flex items-center">
                       <div className="flex flex-wrap gap-2">
-                        {project.technologies.slice(0, 5).map((tech: string, i: number) => (
-                          <TechIcon key={i} name={tech} />
-                        ))}
+                        {(() => {
+                          const techArray = Array.isArray(project.technologies) 
+                            ? project.technologies 
+                            : project.techStack 
+                              ? project.techStack.split(',').map((t: string) => t.trim())
+                              : [];
+                          return techArray.slice(0, 5).map((tech: string, i: number) => (
+                            <TechIcon key={i} name={tech} />
+                          ));
+                        })()}
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-5 border-t border-white/5">
+                  <div className="flex items-center justify-between pt-4 border-t border-white/10">
                     <StatusPill status={project.status} />
 
                     <Link 
@@ -296,7 +370,8 @@ export default function ProjectsPage() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
