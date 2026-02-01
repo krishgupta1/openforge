@@ -5,6 +5,7 @@ import { Globe, Github, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 // --- Components ---
 
@@ -198,14 +199,7 @@ export default function ProjectsPage() {
   }, []);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#050505] text-white font-sans flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <p>Loading projects...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading projects..." />;
   }
 
   // --- Logic: Calculate Counts Dynamically ---

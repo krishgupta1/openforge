@@ -56,7 +56,9 @@ export default function ClerkModalFix() {
         '[role="menu"]',
         'div[style*="position: absolute"]',
         '[data-clerk-user-button] + div',
-        '.clerk-user-button-popover'
+        '.clerk-user-button-popover',
+        '[data-clerk-element="userButton"]',
+        '[data-clerk-portal]'
       ].join(', '));
       
       dropdowns.forEach((dropdown) => {
@@ -67,7 +69,8 @@ export default function ClerkModalFix() {
                                element.getAttribute('role') === 'menu' ||
                                element.querySelector('[data-clerk-user-button]') ||
                                element.innerHTML.includes('Manage account') ||
-                               element.innerHTML.includes('Sign out');
+                               element.innerHTML.includes('Sign out') ||
+                               element.querySelector('[class*="userButton"]');
         
         // Also check if it's positioned near the right side (indicating it's a user dropdown)
         const computedStyle = window.getComputedStyle(element);
@@ -75,13 +78,19 @@ export default function ClerkModalFix() {
                                computedStyle.right === 'auto' && 
                                parseInt(computedStyle.left || '0') > window.innerWidth / 2;
         
-        if ((isUserDropdown || isRightAligned) && 
+        // Check if it contains user profile content
+        const hasUserContent = element.innerHTML.includes('Manage account') || 
+                              element.innerHTML.includes('Sign out') ||
+                              element.querySelector('[data-clerk-navigation-link]');
+        
+        if ((isUserDropdown || isRightAligned || hasUserContent) && 
             (element.style.position === 'absolute' || element.style.position === 'fixed')) {
           // Position to the right side of the viewport
           element.style.position = 'fixed';
           element.style.right = '1rem';
           element.style.top = '4rem';
           element.style.left = 'auto';
+          element.style.bottom = 'auto';
           element.style.transform = 'none';
           element.style.zIndex = '999999';
           element.style.maxWidth = '300px';

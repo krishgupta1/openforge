@@ -24,6 +24,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function AdminIdeasPage() {
   const { user } = useUser();
@@ -342,10 +343,7 @@ export default function AdminIdeasPage() {
 
         {/* Content */}
         {loading ? (
-          <div className="text-center py-12">
-            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
-            <p>Loading {activeTab === 'ideas' ? 'ideas' : 'requests'}...</p>
-          </div>
+          <LoadingSpinner message={`Loading ${activeTab === 'ideas' ? 'ideas' : 'requests'}...`} />
         ) : activeTab === 'ideas' ? (
           // Ideas Tab Content
           filteredIdeas.length === 0 ? (

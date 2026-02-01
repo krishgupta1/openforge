@@ -254,15 +254,15 @@ export default function AboutPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <CreatorCard
               name="Sahil"
-              role="Product & Frontend"
-              desc="Working on the product and frontend while helping shape the community. Believes in building in public and growing together with contributors."
+              role="Build Stuff & Break Stuff"
+              desc="Part of the team figuring things out together — building, experimenting, breaking things, and fixing them again. Here to learn in public and make open source feel less scary."
               icon={<Code className="w-6 h-6" />}
             />
 
             <CreatorCard
               name="Krish"
-              role="System & Backend"
-              desc="Working on systems and backend to keep things simple and reliable. Believes in teamwork, learning by doing, and building alongside the community."
+              role="Makes Things Work Somehow"
+              desc="Part of the team making sure things don't fall apart (most of the time). Enjoys collaborating, learning by doing, and building useful things with the community."
               icon={<Cpu className="w-6 h-6" />}
             />
           </div>

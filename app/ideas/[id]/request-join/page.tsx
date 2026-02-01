@@ -17,6 +17,7 @@ import { useParams } from "next/navigation";
 import { getIdeaById, Idea, createIdeaContributionRequest } from "@/lib/firebase";
 import { useUser } from "@clerk/nextjs";
 import LoginPopup from "@/components/LoginPopup";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 // --- Custom UI Components ---
 
@@ -148,14 +149,7 @@ export default function RequestContributionForm() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-zinc-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading..." />;
   }
 
   if (!idea) {

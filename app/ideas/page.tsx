@@ -16,6 +16,7 @@ import Link from "next/link";
 import { getIdeas, Idea } from "@/lib/firebase";
 import { useUser } from "@clerk/nextjs";
 import LoginPopup from "@/components/LoginPopup";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 // --- Types ---
 type IdeaStatus = "Open" | "In Progress" | "Completed";
@@ -138,14 +139,7 @@ export default function IdeasPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-white/20 pb-32 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Loading ideas...</p>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading ideas..." />;
   }
 
   return (

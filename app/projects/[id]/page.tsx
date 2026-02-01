@@ -23,6 +23,7 @@ import { getFeaturesByProject, ProjectFeature } from "@/lib/firebase";
 import { getContributionsByProject, ProjectContribution } from "@/lib/firebase";
 import LoginPopup from "@/components/LoginPopup";
 import { useClerk } from "@clerk/nextjs";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 // --- Components ---
 
@@ -182,11 +183,7 @@ export default function ProjectDetailPage({
   }, [id, user]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-white/20 border-l-white"></div>
-      </div>
-    );
+    return <LoadingSpinner message="Loading project..." />;
   }
 
   if (!project) {

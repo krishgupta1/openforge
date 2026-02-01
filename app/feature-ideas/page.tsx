@@ -22,6 +22,7 @@ import {
 import { createProjectFeature } from "@/lib/firebase";
 import { getUserData } from "@/lib/createUser";
 import LoginPopup from "@/components/LoginPopup";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 // --- Custom UI Components ---
 
@@ -553,14 +554,7 @@ function FeatureIdeaPage({ projectId, projectName, user, isSignedIn }: { project
 // Export with Suspense wrapper
 export default function FeatureIdeaForm() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-zinc-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Loading...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<LoadingSpinner message="Loading..." />}>
       <FeatureIdeaPageWrapper />
     </Suspense>
   );
