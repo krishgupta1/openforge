@@ -63,6 +63,7 @@ export default function RequestContributionForm() {
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     github: "",
     linkedin: "",
     portfolio: "",
@@ -99,7 +100,7 @@ export default function RequestContributionForm() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const isFormValid = formData.name && formData.github && formData.techStack;
+  const isFormValid = formData.name && formData.email && formData.github && formData.techStack;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,6 +118,7 @@ export default function RequestContributionForm() {
     try {
       await createIdeaContributionRequest({
         name: formData.name,
+        email: formData.email,
         github: formData.github,
         linkedin: formData.linkedin,
         portfolio: formData.portfolio,
@@ -126,6 +128,33 @@ export default function RequestContributionForm() {
         ideaTitle: idea.title
       });
       
+      // Send join request submission email via API
+      try {
+        console.log("📧 Preparing to send join request email to:", formData.email);
+        const response = await fetch("/api/send-contribution-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "join-request-submission",
+            email: formData.email,
+            data: {
+              name: formData.name,
+              ideaTitle: idea.title,
+              techStack: formData.techStack,
+            },
+          }),
+        });
+        
+        if (response.ok) {
+          console.log("✅ Join request email sent successfully to:", formData.email);
+        } else {
+          console.error("❌ Failed to send join request email");
+        }
+      } catch (emailError) {
+        console.error('❌ Error sending join request email:', emailError);
+        // Continue even if email fails
+      }
+      
       setIsSubmitted(true);
       setIsSubmitting(false);
 
@@ -134,6 +163,7 @@ export default function RequestContributionForm() {
         setIsSubmitted(false);
         setFormData({
           name: "",
+          email: "",
           github: "",
           linkedin: "",
           portfolio: "",
@@ -231,6 +261,23 @@ export default function RequestContributionForm() {
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder="e.g. Sahil Mishra"
+                    className="pl-11"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Email (Required) */}
+              <div>
+                <Label>Email Address <span className="text-red-500">*</span></Label>
+                <div className="relative">
+                  <Globe className="absolute left-4 top-3.5 w-4 h-4 text-zinc-500 pointer-events-none" />
+                  <Input
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="your.email@example.com"
                     className="pl-11"
                     required
                   />

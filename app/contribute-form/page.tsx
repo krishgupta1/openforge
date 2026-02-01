@@ -104,6 +104,7 @@ function ContributionFormPage({ projectId, projectName, user, isSignedIn }: { pr
   
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     github: "",
     linkedin: "",
     mobile: "",
@@ -134,6 +135,7 @@ function ContributionFormPage({ projectId, projectName, user, isSignedIn }: { pr
           if (userData) {
             setFormData(prev => ({
               ...prev,
+              email: userData.email || user.primaryEmailAddress?.emailAddress || "",
               github: userData.github || "",
               linkedin: userData.linkedin || ""
             }));
@@ -235,6 +237,13 @@ function ContributionFormPage({ projectId, projectName, user, isSignedIn }: { pr
       }
     }
 
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
     // Optional field validations (only if filled)
     if (formData.name && formData.name.trim().length < 2) {
       newErrors.name = "Name must be at least 2 characters long";
@@ -284,6 +293,7 @@ function ContributionFormPage({ projectId, projectName, user, isSignedIn }: { pr
         timeline: formData.timeline,
         howCanHelp: formData.howCanHelp,
         name: formData.name || 'Anonymous',
+        email: formData.email,
         github: formData.github || 'N/A',
         linkedin: formData.linkedin,
         mobile: formData.mobile,
@@ -294,6 +304,34 @@ function ContributionFormPage({ projectId, projectName, user, isSignedIn }: { pr
 
       await createProjectContribution(contributionData);
       
+      // Send submission receipt email via API
+      try {
+        console.log("📧 Preparing to send receipt email to:", formData.email);
+        const response = await fetch("/api/send-contribution-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "submission",
+            email: formData.email,
+            data: {
+              name: formData.name || 'Contributor',
+              projectName: decodeURIComponent(projectName),
+              title: formData.title,
+              contributionType: formData.contributionType,
+            },
+          }),
+        });
+        
+        if (response.ok) {
+          console.log("✅ Receipt email sent successfully to:", formData.email);
+        } else {
+          console.error("❌ Failed to send receipt email");
+        }
+      } catch (emailError) {
+        console.error('❌ Error sending submission receipt email:', emailError);
+        // Continue even if email fails
+      }
+      
       setIsSubmitted(true);
       setIsSubmitting(false);
 
@@ -302,6 +340,7 @@ function ContributionFormPage({ projectId, projectName, user, isSignedIn }: { pr
         setIsSubmitted(false);
         setFormData({
           name: "",
+          email: "",
           github: "",
           linkedin: "",
           mobile: "",
@@ -432,6 +471,23 @@ function ContributionFormPage({ projectId, projectName, user, isSignedIn }: { pr
             </h3>
 
             <div className="space-y-5">
+              <div>
+                <Label>Email Address <span className="text-red-500">*</span></Label>
+                <div className="relative">
+                  <User className="absolute left-4 top-3.5 w-4 h-4 text-zinc-500 pointer-events-none" />
+                  <Input
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="your.email@example.com"
+                    className="pl-11"
+                    required
+                    error={errors.email}
+                  />
+                </div>
+              </div>
+
               <div>
                 <Label>Full Name</Label>
                 <div className="relative">

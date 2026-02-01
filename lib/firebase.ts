@@ -172,6 +172,8 @@ export interface ProjectFeature {
   github: string;
   linkedin?: string;
   mobile?: string;
+  email: string;
+  userId?: string;
   status: 'pending' | 'approved' | 'rejected';
   projectId: string;
   projectName: string;
@@ -282,6 +284,7 @@ export interface ProjectContribution {
   timeline: string;
   howCanHelp: string;
   name: string;
+  email: string;
   github: string;
   linkedin?: string;
   mobile?: string;
@@ -391,14 +394,15 @@ export async function deleteProjectContribution(id: string) {
 export interface IdeaContributionRequest {
   id?: string;
   name: string;
+  email: string;
   github: string;
   linkedin?: string;
   portfolio?: string;
   techStack: string;
   message?: string;
-  status: 'pending' | 'approved' | 'rejected';
   ideaId: string;
   ideaTitle: string;
+  status: 'pending' | 'approved' | 'rejected';
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 }

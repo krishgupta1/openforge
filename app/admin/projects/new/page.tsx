@@ -34,7 +34,7 @@ export default function NewProject() {
           // Define logical order for fields
           const fieldOrder = [
             "title", "shortDescription", "status", "timeline", "role", "team", 
-            "techStack", "githubUrl", "liveUrl", "mockupImage", "overview", 
+            "technologies", "techStack", "githubUrl", "liveUrl", "mockupImage", "overview", 
             "features", "whatUsersCanDo", "whyIBuiltThis", "impact", 
             "futurePlans"
           ];
@@ -61,6 +61,7 @@ export default function NewProject() {
             "timeline", 
             "role", 
             "team", 
+            "technologies", 
             "techStack", 
             "githubUrl", 
             "liveUrl", 
@@ -177,7 +178,7 @@ export default function NewProject() {
                     <div>
                       <input
                         type="text"
-                        placeholder={key === "technologies" ? "React, TypeScript, Tailwind CSS (comma-separated)" : "React, TypeScript, Next.js, Firebase (comma-separated)"}
+                        placeholder={key === "technologies" ? "React, TypeScript, Tailwind CSS (for logo display)" : key === "techStack" ? "React, TypeScript, Next.js, Firebase (comma-separated)" : "React, TypeScript, Next.js, Firebase (comma-separated)"}
                         className="w-full px-4 py-3 bg-neutral-900/50 border border-white/10 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-white/20 transition-colors"
                         value={form[key] || ""}
                         onChange={(e) =>
@@ -185,7 +186,7 @@ export default function NewProject() {
                         }
                       />
                       <p className="text-xs text-zinc-500 mt-2">
-                        Enter technologies separated by commas
+                        {key === "technologies" ? "Enter technologies for logo display (supports React, TypeScript, Next.js, etc.)" : "Enter technologies separated by commas"}
                       </p>
                     </div>
                   ) : key === "timeline" ? (

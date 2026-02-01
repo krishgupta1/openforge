@@ -251,11 +251,45 @@ function FeatureIdeaPage({ projectId, projectName, user, isSignedIn }: { project
         name: formData.name || 'Anonymous',
         github: formData.github || 'N/A',
         linkedin: formData.linkedin,
+        email: user?.primaryEmailAddress?.emailAddress || 'your@email.com',
+        userId: user?.id || '',
         projectId: projectId,
         projectName: decodeURIComponent(projectName),
       };
 
       await createProjectFeature(featureData);
+      
+      // Send submission receipt email
+      try {
+        if (user?.primaryEmailAddress?.emailAddress) {
+          const response = await fetch('/api/send-feature-submission-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: user.primaryEmailAddress.emailAddress,
+              type: 'submission',
+              data: {
+                name: formData.name || 'Anonymous',
+                projectName: decodeURIComponent(projectName),
+                title: formData.title,
+                category: formData.category,
+                difficulty: formData.difficulty,
+              },
+            }),
+          });
+
+          if (!response.ok) {
+            console.error('Failed to send submission email:', await response.text());
+          } else {
+            console.log('✅ Feature idea submission email sent successfully');
+          }
+        }
+      } catch (emailError) {
+        console.error('Error sending submission email:', emailError);
+        // Don't fail the submission if email fails
+      }
       
       setIsSubmitted(true);
       setIsSubmitting(false);

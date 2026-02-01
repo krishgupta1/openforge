@@ -3,7 +3,7 @@
 import { useUser } from "@clerk/nextjs";
 import { isAdmin } from "@/lib/isAdmin";
 import Link from "next/link";
-import { getIdeas, updateIdeaStatus, deleteIdea, Idea, getIdeaContributionRequests, updateIdeaContributionRequestStatus, deleteIdeaContributionRequest, IdeaContributionRequest } from "@/lib/firebase";
+import { getIdeas, updateIdeaStatus, deleteIdea, Idea, getIdeaContributionRequests, updateIdeaContributionRequestStatus, deleteIdeaContributionRequest, IdeaContributionRequest, getProjectFeatures, updateProjectFeatureStatus, deleteProjectFeature, ProjectFeature } from "@/lib/firebase";
 import { useEffect, useState } from "react";
 import {
   Check,
@@ -32,17 +32,22 @@ export default function AdminIdeasPage() {
   const [filteredIdeas, setFilteredIdeas] = useState<Idea[]>([]);
   const [contributionRequests, setContributionRequests] = useState<IdeaContributionRequest[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<IdeaContributionRequest[]>([]);
+  const [projectFeatures, setProjectFeatures] = useState<ProjectFeature[]>([]);
+  const [filteredProjectFeatures, setFilteredProjectFeatures] = useState<ProjectFeature[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [requestStatusFilter, setRequestStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
+  const [featureStatusFilter, setFeatureStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null);
   const [selectedRequest, setSelectedRequest] = useState<IdeaContributionRequest | null>(null);
+  const [selectedFeature, setSelectedFeature] = useState<ProjectFeature | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'ideas' | 'requests'>('ideas');
+  const [activeTab, setActiveTab] = useState<'ideas' | 'requests' | 'features'>('ideas');
 
   useEffect(() => {
     fetchIdeas();
     fetchRequests();
+    fetchProjectFeatures();
   }, []);
 
   useEffect(() => {
@@ -52,6 +57,10 @@ export default function AdminIdeasPage() {
   useEffect(() => {
     filterRequests();
   }, [contributionRequests, requestStatusFilter]);
+
+  useEffect(() => {
+    filterProjectFeatures();
+  }, [projectFeatures, featureStatusFilter]);
 
   const fetchIdeas = async () => {
     try {
@@ -68,6 +77,15 @@ export default function AdminIdeasPage() {
       setContributionRequests(fetchedRequests);
     } catch (error) {
       console.error('Error fetching contribution requests:', error);
+    }
+  };
+
+  const fetchProjectFeatures = async () => {
+    try {
+      const fetchedFeatures = await getProjectFeatures();
+      setProjectFeatures(fetchedFeatures);
+    } catch (error) {
+      console.error('Error fetching project features:', error);
     } finally {
       setLoading(false);
     }
@@ -86,6 +104,14 @@ export default function AdminIdeasPage() {
       setFilteredRequests(contributionRequests);
     } else {
       setFilteredRequests(contributionRequests.filter(request => request.status === requestStatusFilter));
+    }
+  };
+
+  const filterProjectFeatures = () => {
+    if (featureStatusFilter === 'all') {
+      setFilteredProjectFeatures(projectFeatures);
+    } else {
+      setFilteredProjectFeatures(projectFeatures.filter(feature => feature.status === featureStatusFilter));
     }
   };
 
@@ -115,11 +141,102 @@ export default function AdminIdeasPage() {
     }
   };
 
+  const handleFeatureStatusUpdate = async (featureId: string, status: 'approved' | 'rejected') => {
+    setActionLoading(featureId);
+    try {
+      const feature = projectFeatures.find(f => f.id === featureId);
+      if (!feature) return;
+
+      await updateProjectFeatureStatus(featureId, status);
+      
+      // Send email notification via API route
+      try {
+        const userEmail = feature.email;
+        if (userEmail && userEmail !== 'your@email.com') {
+          const apiUrl = status === 'approved' 
+            ? '/api/send-feature-approval-email'
+            : '/api/send-feature-rejection-email';
+          
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: userEmail,
+              data: {
+                name: feature.name,
+                projectName: feature.projectName,
+                title: feature.title,
+              },
+            }),
+          });
+
+          if (!response.ok) {
+            console.error('Failed to send email:', await response.text());
+          } else {
+            console.log('✅ Feature status email sent successfully');
+          }
+        }
+      } catch (emailError) {
+        console.error('Error sending feature status email:', emailError);
+        // Don't fail the status update if email fails
+      }
+      
+      await fetchProjectFeatures(); // Refresh the list
+    } catch (error) {
+      console.error('Error updating feature status:', error);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleFeatureDelete = async (featureId: string) => {
+    if (!confirm('Are you sure you want to delete this feature idea?')) return;
+    
+    setActionLoading(featureId);
+    try {
+      await deleteProjectFeature(featureId);
+      await fetchProjectFeatures(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting feature:', error);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const handleRequestStatusUpdate = async (requestId: string, status: 'approved' | 'rejected') => {
     setActionLoading(requestId);
     try {
       await updateIdeaContributionRequestStatus(requestId, status);
-      await fetchRequests(); // Refresh the list
+      
+      // Send email notification
+      const request = contributionRequests.find(r => r.id === requestId);
+      if (request) {
+        console.log("🔍 Found join request:", request.email);
+        
+        try {
+          const emailType = status === 'approved' ? 'join-request-approved' : 'join-request-rejected';
+          await fetch("/api/send-contribution-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: emailType,
+              email: request.email,
+              data: {
+                name: request.name,
+                ideaTitle: request.ideaTitle,
+              },
+            }),
+          });
+          console.log("✅ Join request email notification sent for:", request.email);
+        } catch (emailError) {
+          console.error('❌ Error sending join request notification email:', emailError);
+          // Continue even if email fails
+        }
+      }
+      
+      await fetchRequests(); // Refresh data
     } catch (error) {
       console.error('Error updating request status:', error);
     } finally {
@@ -246,6 +363,16 @@ export default function AdminIdeasPage() {
             >
               Contribution Requests ({contributionRequests.length})
             </button>
+            <button
+              onClick={() => setActiveTab('features')}
+              className={`px-4 py-2 font-medium transition-colors border-b-2 ${
+                activeTab === 'features'
+                  ? 'text-white border-white'
+                  : 'text-zinc-400 border-transparent hover:text-zinc-300'
+              }`}
+            >
+              Feature Ideas ({projectFeatures.length})
+            </button>
           </div>
 
           {/* Stats */}
@@ -268,7 +395,7 @@ export default function AdminIdeasPage() {
                 <p className="text-zinc-400 text-sm">Rejected</p>
               </div>
             </div>
-          ) : (
+          ) : activeTab === 'requests' ? (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-4">
                 <h3 className="text-lg font-bold text-white">{contributionRequests.length}</h3>
@@ -287,7 +414,26 @@ export default function AdminIdeasPage() {
                 <p className="text-zinc-400 text-sm">Rejected</p>
               </div>
             </div>
-          )}
+          ) : activeTab === 'features' ? (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-4">
+                <h3 className="text-lg font-bold text-white">{projectFeatures.length}</h3>
+                <p className="text-zinc-400 text-sm">Total Features</p>
+              </div>
+              <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-4">
+                <h3 className="text-lg font-bold text-yellow-400">{projectFeatures.filter(f => f.status === 'pending').length}</h3>
+                <p className="text-zinc-400 text-sm">Pending Review</p>
+              </div>
+              <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-4">
+                <h3 className="text-lg font-bold text-emerald-400">{projectFeatures.filter(f => f.status === 'approved').length}</h3>
+                <p className="text-zinc-400 text-sm">Approved</p>
+              </div>
+              <div className="bg-neutral-900/40 border border-white/5 rounded-xl p-4">
+                <h3 className="text-lg font-bold text-red-400">{projectFeatures.filter(f => f.status === 'rejected').length}</h3>
+                <p className="text-zinc-400 text-sm">Rejected</p>
+              </div>
+            </div>
+          ) : null}
 
           {/* Filter */}
           {activeTab === 'ideas' ? (
@@ -314,7 +460,7 @@ export default function AdminIdeasPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          ) : (
+          ) : activeTab === 'requests' ? (
             <div className="flex items-center gap-4">
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors">
@@ -338,12 +484,39 @@ export default function AdminIdeasPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          )}
+          ) : activeTab === 'features' ? (
+            <div className="flex items-center gap-4">
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors">
+                  <Filter className="w-4 h-4" />
+                  {featureStatusFilter === 'all' ? 'All Features' : featureStatusFilter.charAt(0).toUpperCase() + featureStatusFilter.slice(1)}
+                  <ChevronDown className="w-4 h-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-zinc-800 border-zinc-700">
+                  <DropdownMenuItem onClick={() => setFeatureStatusFilter('all')} className="hover:bg-zinc-700">
+                    All Features
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFeatureStatusFilter('pending')} className="hover:bg-zinc-700">
+                    Pending
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFeatureStatusFilter('approved')} className="hover:bg-zinc-700">
+                    Approved
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFeatureStatusFilter('rejected')} className="hover:bg-zinc-700">
+                    Rejected
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : null}
         </div>
 
         {/* Content */}
         {loading ? (
-          <LoadingSpinner message={`Loading ${activeTab === 'ideas' ? 'ideas' : 'requests'}...`} />
+          <div className="text-center py-12">
+            <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4" />
+            <p>Loading {activeTab === 'ideas' ? 'ideas' : activeTab === 'requests' ? 'requests' : 'features'}...</p>
+          </div>
         ) : activeTab === 'ideas' ? (
           // Ideas Tab Content
           filteredIdeas.length === 0 ? (
@@ -427,7 +600,7 @@ export default function AdminIdeasPage() {
               ))}
             </div>
           )
-        ) : (
+        ) : activeTab === 'requests' ? (
           // Requests Tab Content
           filteredRequests.length === 0 ? (
             <div className="text-center py-12">
@@ -523,7 +696,98 @@ export default function AdminIdeasPage() {
               ))}
             </div>
           )
-        )}
+        ) : activeTab === 'features' ? (
+          // Features Tab Content
+          filteredProjectFeatures.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-zinc-400">No feature ideas found</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredProjectFeatures.map((feature) => (
+                <div key={feature.id} className="bg-neutral-900/40 border border-white/5 rounded-xl p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-semibold text-white">{feature.title}</h3>
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(feature.status)}`}>
+                          {getStatusIcon(feature.status)}
+                          {feature.status.charAt(0).toUpperCase() + feature.status.slice(1)}
+                        </span>
+                      </div>
+                      <p className="text-zinc-400 text-sm mb-2">
+                        <strong>Project:</strong> {feature.projectName}
+                      </p>
+                      <p className="text-zinc-400 text-sm mb-3 line-clamp-2">
+                        {feature.description}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-zinc-500">
+                        <div className="flex items-center gap-1">
+                          <User className="w-3 h-3" />
+                          {feature.name}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Github className="w-3 h-3" />
+                          {feature.github}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="px-2 py-1 bg-zinc-800 rounded text-xs">{feature.category}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="px-2 py-1 bg-zinc-800 rounded text-xs">{feature.difficulty}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(feature.createdAt)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setSelectedFeature(feature)}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm transition-colors"
+                    >
+                      <Eye className="w-3 h-3" />
+                      View Details
+                    </button>
+                    
+                    {feature.status === 'pending' && (
+                      <>
+                        <button
+                          onClick={() => handleFeatureStatusUpdate(feature.id!, 'approved')}
+                          disabled={actionLoading === feature.id}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-sm transition-colors disabled:opacity-50"
+                        >
+                          <Check className="w-3 h-3" />
+                          {actionLoading === feature.id ? 'Processing...' : 'Approve'}
+                        </button>
+                        <button
+                          onClick={() => handleFeatureStatusUpdate(feature.id!, 'rejected')}
+                          disabled={actionLoading === feature.id}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg text-sm transition-colors disabled:opacity-50"
+                        >
+                          <X className="w-3 h-3" />
+                          {actionLoading === feature.id ? 'Processing...' : 'Reject'}
+                        </button>
+                      </>
+                    )}
+                    
+                    <button
+                      onClick={() => handleFeatureDelete(feature.id!)}
+                      disabled={actionLoading === feature.id}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm transition-colors disabled:opacity-50"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
+        ) : null}
 
         {/* Idea Detail Modal */}
         {selectedIdea && (
@@ -716,6 +980,129 @@ export default function AdminIdeasPage() {
                 )}
                 <button
                   onClick={() => setSelectedRequest(null)}
+                  className="flex-1 bg-zinc-700 hover:bg-zinc-600 text-white py-2 rounded-lg transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Feature Detail Modal */}
+        {selectedFeature && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-zinc-900 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white">{selectedFeature.title}</h2>
+                <button
+                  onClick={() => setSelectedFeature(null)}
+                  className="text-zinc-400 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-semibold text-zinc-400 mb-2">Project</h3>
+                  <p className="text-zinc-300">{selectedFeature.projectName}</p>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-zinc-400 mb-2">Description</h3>
+                  <p className="text-zinc-300">{selectedFeature.description}</p>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-zinc-400 mb-2">Proposed Solution</h3>
+                  <p className="text-zinc-300">{selectedFeature.solution}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-zinc-400 mb-2">Category</h3>
+                    <p className="text-zinc-300">{selectedFeature.category}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-zinc-400 mb-2">Difficulty</h3>
+                    <p className="text-zinc-300">{selectedFeature.difficulty}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-zinc-400 mb-2">Contributor Information</h3>
+                  <div className="space-y-1 text-zinc-300">
+                    <p><strong>Name:</strong> {selectedFeature.name}</p>
+                    <p>
+                      <strong>GitHub:</strong>{' '}
+                      <a 
+                        href={`https://github.com/${selectedFeature.github}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                      >
+                        {selectedFeature.github}
+                      </a>
+                    </p>
+                    {selectedFeature.linkedin && (
+                      <p>
+                        <strong>LinkedIn:</strong>{' '}
+                        <a 
+                          href={selectedFeature.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-400 hover:text-blue-300 underline"
+                        >
+                          LinkedIn Profile
+                        </a>
+                      </p>
+                    )}
+                    <p><strong>Email:</strong> {selectedFeature.email}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-zinc-400 mb-2">Status</h3>
+                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(selectedFeature.status)}`}>
+                    {getStatusIcon(selectedFeature.status)}
+                    {selectedFeature.status.charAt(0).toUpperCase() + selectedFeature.status.slice(1)}
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-semibold text-zinc-400 mb-2">Submitted</h3>
+                  <p className="text-zinc-300">{formatDate(selectedFeature.createdAt)}</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2 mt-6">
+                {selectedFeature.status === 'pending' && (
+                  <>
+                    <button
+                      onClick={() => {
+                        handleFeatureStatusUpdate(selectedFeature.id!, 'approved');
+                        setSelectedFeature(null);
+                      }}
+                      disabled={actionLoading === selectedFeature.id}
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => {
+                        handleFeatureStatusUpdate(selectedFeature.id!, 'rejected');
+                        setSelectedFeature(null);
+                      }}
+                      disabled={actionLoading === selectedFeature.id}
+                      className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => setSelectedFeature(null)}
                   className="flex-1 bg-zinc-700 hover:bg-zinc-600 text-white py-2 rounded-lg transition-colors"
                 >
                   Close
