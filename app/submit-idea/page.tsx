@@ -278,7 +278,7 @@ export default function ShareIdeaPage() {
                       name="linkedin"
                       value={formData.linkedin}
                       onChange={handleInputChange}
-                      placeholder="in/username"
+                      placeholder="https://linkedin.com/in/username"
                       className="pl-11"
                     />
                   </div>

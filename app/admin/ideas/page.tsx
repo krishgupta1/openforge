@@ -202,7 +202,8 @@ export default function AdminIdeasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-10">
+    // UPDATED: Added pt-24 for extra top spacing
+    <div className="min-h-screen bg-[#050505] text-white px-10 pb-10 pt-24">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -212,14 +213,7 @@ export default function AdminIdeasPage() {
               <p className="text-zinc-400">Review ideas and contribution requests</p>
             </div>
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => activeTab === 'ideas' ? fetchIdeas() : fetchRequests()}
-                className="flex items-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
-                disabled={loading}
-              >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
+              {/* UPDATED: Refresh Button Removed */}
               <Link
                 href="/admin"
                 className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"

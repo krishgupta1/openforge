@@ -4,6 +4,7 @@ import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getProjectFeatures, updateProjectFeatureStatus, deleteProjectFeature, ProjectFeature } from "@/lib/firebase";
 import { getProjectContributions, updateProjectContributionStatus, deleteProjectContribution, ProjectContribution } from "@/lib/firebase";
 import {
@@ -23,7 +24,8 @@ import {
   Layout,
   Layers,
   Activity,
-  AlertCircle
+  AlertCircle,
+  ArrowLeft
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -33,6 +35,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function AdminProjects() {
+  const router = useRouter();
   const [projects, setProjects] = useState<any[]>([]);
   const [features, setFeatures] = useState<ProjectFeature[]>([]);
   const [filteredFeatures, setFilteredFeatures] = useState<ProjectFeature[]>([]);
@@ -218,15 +221,25 @@ export default function AdminProjects() {
               </p>
             </div>
             
-            {activeTab === 'projects' && (
-              <Link 
-                href="/admin/projects/new"
-                className="group flex items-center gap-2 px-5 py-2.5 bg-white text-black text-sm font-semibold hover:bg-zinc-200 transition-all rounded-lg shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_20px_-3px_rgba(255,255,255,0.4)]"
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.back()}
+                className="flex items-center gap-2 px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-sm font-medium transition-all rounded-lg border border-white/5 hover:border-white/10"
               >
-                <Layout className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                New Project
-              </Link>
-            )}
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </button>
+              
+              {activeTab === 'projects' && (
+                <Link 
+                  href="/admin/projects/new"
+                  className="group flex items-center gap-2 px-5 py-2.5 bg-white text-black text-sm font-semibold hover:bg-zinc-200 transition-all rounded-lg shadow-[0_0_20px_-5px_rgba(255,255,255,0.3)] hover:shadow-[0_0_20px_-3px_rgba(255,255,255,0.4)]"
+                >
+                  <Layout className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  New Project
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* Navigation Tabs */}

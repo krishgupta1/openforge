@@ -213,8 +213,8 @@ function FeatureIdeaPage({ projectId, projectName, user, isSignedIn }: { project
       newErrors.github = "Please enter a valid GitHub username (e.g., username)";
     }
 
-    if (formData.linkedin && !/^in\/[a-zA-Z0-9]([a-zA-Z0-9-]{0,99})$/.test(formData.linkedin)) {
-      newErrors.linkedin = "Please enter a valid LinkedIn username (e.g., in/username)";
+    if (formData.linkedin && !/^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9]([a-zA-Z0-9-]{0,99})\/?$/.test(formData.linkedin)) {
+      newErrors.linkedin = "Please enter a valid LinkedIn profile URL (e.g., https://linkedin.com/in/username)";
     }
 
     setErrors(newErrors);
@@ -357,7 +357,7 @@ function FeatureIdeaPage({ projectId, projectName, user, isSignedIn }: { project
                       name="github"
                       value={formData.github}
                       onChange={handleInputChange}
-                      placeholder="https://github.com/username"
+                      placeholder="username"
                       className="pl-11"
                       error={errors.github}
                     />

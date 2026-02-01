@@ -14,13 +14,19 @@ import {
   Terminal,
   Cpu,
   Layers,
-  Sparkles
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 
 // --- Components ---
 
-const SectionHeading = ({ title, icon }: { title: string; icon: React.ReactNode }) => (
+const SectionHeading = ({
+  title,
+  icon,
+}: {
+  title: string;
+  icon: React.ReactNode;
+}) => (
   <h2 className="text-xl font-bold text-white mb-8 flex items-center gap-3">
     <div className="p-2 rounded-lg bg-zinc-900/50 text-white border border-zinc-800">
       {icon}
@@ -29,7 +35,15 @@ const SectionHeading = ({ title, icon }: { title: string; icon: React.ReactNode 
   </h2>
 );
 
-const FeatureCard = ({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) => (
+const FeatureCard = ({
+  icon,
+  title,
+  desc,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+}) => (
   <div className="p-6 bg-[#09090b] border border-zinc-800 rounded-xl hover:border-zinc-700 transition-all hover:bg-zinc-900/30 group">
     <div className="w-10 h-10 bg-zinc-900 rounded-lg flex items-center justify-center text-zinc-400 mb-4 border border-zinc-800 group-hover:text-white group-hover:border-zinc-700 transition-colors">
       {icon}
@@ -39,20 +53,30 @@ const FeatureCard = ({ icon, title, desc }: { icon: React.ReactNode; title: stri
   </div>
 );
 
-const CreatorCard = ({ name, role, desc, icon }: { name: string; role: string; desc: string; icon: React.ReactNode }) => (
-  <div className="group p-6 bg-[#09090b] border border-zinc-800 rounded-xl hover:border-zinc-600 transition-all duration-300">
+const CreatorCard = ({
+  name,
+  role,
+  desc,
+  icon,
+}: {
+  name: string;
+  role: string;
+  desc: string;
+  icon: React.ReactNode;
+}) => (
+  <div className="group p-6 bg-[#09090b] border border-zinc-800 rounded-xl hover:border-zinc-600 transition-all duration-300 h-full">
     <div className="flex items-center gap-4 mb-4">
-      <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700 group-hover:scale-105 transition-transform text-zinc-300 group-hover:text-white">
+      <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center border border-zinc-700 group-hover:scale-105 transition-transform text-zinc-300 group-hover:text-white shrink-0">
         {icon}
       </div>
       <div>
         <h3 className="text-lg font-bold text-white">{name}</h3>
-        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">{role}</p>
+        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+          {role}
+        </p>
       </div>
     </div>
-    <p className="text-sm text-zinc-400 leading-relaxed">
-      {desc}
-    </p>
+    <p className="text-sm text-zinc-400 leading-relaxed">{desc}</p>
   </div>
 );
 
@@ -62,7 +86,6 @@ export default function AboutPage() {
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-zinc-800">
       <div className="max-w-5xl mx-auto px-6 py-24">
-        
         {/* --- Header (1. About the Platform) --- */}
         <div className="mb-24 pt-10">
           <Link
@@ -77,32 +100,39 @@ export default function AboutPage() {
             About the Platform
           </h1>
           <p className="text-xl text-zinc-400 max-w-2xl leading-relaxed font-light">
-            This platform is built to bring developers together through open-source collaboration. 
-            <span className="text-zinc-200"> Keep building, learning, and growing together.</span>
+            This platform is built to bring developers together through
+            open-source collaboration.
+            <span className="text-zinc-200">
+              {" "}
+              Keep building, learning, and growing together.
+            </span>
           </p>
         </div>
 
         {/* --- 2. What Developers Can Do --- */}
         <div className="mb-24">
-          <SectionHeading title="What You Can Do" icon={<Layers className="w-5 h-5 text-blue-500" />} />
-          
+          <SectionHeading
+            title="What You Can Do"
+            icon={<Layers className="w-5 h-5 text-blue-500" />}
+          />
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FeatureCard 
+            <FeatureCard
               icon={<Lightbulb className="w-5 h-5" />}
               title="Share Ideas"
               desc="Have a project in mind? Share your ideas and find a team to build them with."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<GitPullRequest className="w-5 h-5" />}
               title="Suggest Features"
               desc="Contribute to existing projects by suggesting features or improvements."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<Code className="w-5 h-5" />}
               title="Contribute Code"
               desc="Dive into open source. Fork repositories, fix bugs, and merge PRs."
             />
-            <FeatureCard 
+            <FeatureCard
               icon={<Users className="w-5 h-5" />}
               title="Collaborate"
               desc="Don't code alone. Collaborate with like-minded developers and build as a team."
@@ -113,10 +143,14 @@ export default function AboutPage() {
         {/* --- 3. Our Agenda / Vision --- */}
         <div className="mb-24">
           <div className="p-8 bg-zinc-900/20 border border-zinc-800 rounded-2xl">
-            <SectionHeading title="Our Agenda" icon={<Target className="w-5 h-5 text-emerald-500" />} />
-            
+            <SectionHeading
+              title="Our Agenda"
+              icon={<Target className="w-5 h-5 text-emerald-500" />}
+            />
+
             <p className="text-zinc-400 mb-8 max-w-2xl">
-              We believe in the power of open source and building in public. Here is what we stand for:
+              We believe in the power of open source and building in public.
+              Here is what we stand for:
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -126,11 +160,16 @@ export default function AboutPage() {
                 "Help developers collaborate easily",
                 "Create a beginner-friendly community",
                 "Build everything in public",
-                "This platform itself is open source"
+                "This platform itself is open source",
               ].map((item, i) => (
-                <div key={i} className="flex items-center gap-3 p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-lg hover:border-zinc-700 transition-colors">
+                <div
+                  key={i}
+                  className="flex items-center gap-3 p-4 bg-zinc-900/50 border border-zinc-800/50 rounded-lg hover:border-zinc-700 transition-colors"
+                >
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                  <span className="text-sm text-zinc-300 font-medium">{item}</span>
+                  <span className="text-sm text-zinc-300 font-medium">
+                    {item}
+                  </span>
                 </div>
               ))}
             </div>
@@ -139,70 +178,91 @@ export default function AboutPage() {
 
         {/* --- 4. Why We Built This (Problem/Solution) --- */}
         <div className="mb-24">
-           <SectionHeading title="Why We Built This" icon={<Heart className="w-5 h-5 text-red-500" />} />
-           
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Problem */}
-              <div className="p-8 border border-red-900/20 bg-red-900/5 rounded-xl">
-                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <span className="w-1.5 h-6 bg-red-500 rounded-full"/> The Problem
-                </h3>
-                <ul className="space-y-4 text-zinc-400 text-sm leading-relaxed">
-                  <li className="flex items-start gap-3">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                    Many developers have great ideas but <span className="text-zinc-200 font-medium">no team</span>.
+          <SectionHeading
+            title="Why We Built This"
+            icon={<Heart className="w-5 h-5 text-red-500" />}
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Problem */}
+            <div className="p-8 border border-red-900/20 bg-red-900/5 rounded-xl">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-6 bg-red-500 rounded-full" /> The
+                Problem
+              </h3>
+              <ul className="space-y-4 text-zinc-400 text-sm leading-relaxed">
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                  Many developers have great ideas but{" "}
+                  <span className="text-zinc-200 font-medium">no team</span>.
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                  Many want to contribute but{" "}
+                  <span className="text-zinc-200 font-medium">
+                    don't know where to start
+                  </span>
+                  .
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                  Open-source feels{" "}
+                  <span className="text-zinc-200 font-medium">complex</span> for
+                  beginners.
+                </li>
+              </ul>
+            </div>
+
+            {/* Solution */}
+            <div className="p-8 border border-emerald-900/20 bg-emerald-900/5 rounded-xl">
+              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <span className="w-1.5 h-6 bg-emerald-500 rounded-full" /> The
+                Solution
+              </h3>
+              <div className="space-y-4 text-zinc-400 text-sm leading-relaxed">
+                <p>We built a simple, clean platform where:</p>
+                <ul className="space-y-3">
+                  <li className="flex items-center gap-3">
+                    <Sparkles className="w-4 h-4 text-emerald-500" />
+                    <span className="text-white">Ideas meet contributors</span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                    Many want to contribute but <span className="text-zinc-200 font-medium">don't know where to start</span>.
+                  <li className="flex items-center gap-3">
+                    <Sparkles className="w-4 h-4 text-emerald-500" />
+                    <span className="text-white">
+                      Contributors become teammates
+                    </span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-                    Open-source feels <span className="text-zinc-200 font-medium">complex</span> for beginners.
+                  <li className="flex items-center gap-3">
+                    <Sparkles className="w-4 h-4 text-emerald-500" />
+                    <span className="text-white">
+                      Teammates build real projects
+                    </span>
                   </li>
                 </ul>
               </div>
-
-              {/* Solution */}
-              <div className="p-8 border border-emerald-900/20 bg-emerald-900/5 rounded-xl">
-                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <span className="w-1.5 h-6 bg-emerald-500 rounded-full"/> The Solution
-                </h3>
-                <div className="space-y-4 text-zinc-400 text-sm leading-relaxed">
-                  <p>We built a simple, clean platform where:</p>
-                  <ul className="space-y-3">
-                    <li className="flex items-center gap-3">
-                      <Sparkles className="w-4 h-4 text-emerald-500" />
-                      <span className="text-white">Ideas meet contributors</span>
-                    </li>
-                    <li className="flex items-center gap-3">
-                      <Sparkles className="w-4 h-4 text-emerald-500" />
-                      <span className="text-white">Contributors become teammates</span>
-                    </li>
-                    <li className="flex items-center gap-3">
-                      <Sparkles className="w-4 h-4 text-emerald-500" />
-                      <span className="text-white">Teammates build real projects</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-           </div>
+            </div>
+          </div>
         </div>
 
         {/* --- 5. About the Creators (Minimal) --- */}
         <div className="mb-24">
-          <SectionHeading title="About the Creators" icon={<Terminal className="w-5 h-5 text-yellow-500" />} />
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <CreatorCard 
+          <SectionHeading
+            title="Who Built This?"
+            icon={<Users className="w-5 h-5 text-purple-500" />}
+          />
+          {/* Added Grid Layout for Creators */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CreatorCard
               name="Sahil"
               role="Product & Frontend"
-              desc="A developer who loves building products, exploring new technologies, and creating communities around learning and collaboration. Focused on clean UI, real-world projects, and open-source culture."
+              desc="Working on the product and frontend while helping shape the community. Believes in building in public and growing together with contributors."
               icon={<Code className="w-6 h-6" />}
             />
-            <CreatorCard 
+
+            <CreatorCard
               name="Krish"
               role="System & Backend"
-              desc="A passionate developer with a strong interest in system design, backend technologies, and scalable solutions. Believes in teamwork, experimentation, and learning by building."
+              desc="Working on systems and backend to keep things simple and reliable. Believes in teamwork, learning by doing, and building alongside the community."
               icon={<Cpu className="w-6 h-6" />}
             />
           </div>
@@ -213,27 +273,27 @@ export default function AboutPage() {
           <div className="w-14 h-14 bg-zinc-800 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-zinc-700 shadow-xl">
             <Globe className="w-7 h-7 text-white" />
           </div>
-          
+
           <h2 className="text-3xl font-bold text-white mb-4">Join Us</h2>
           <p className="text-zinc-400 mb-8 max-w-lg mx-auto text-base">
-            Whether you are a beginner, an experienced developer, or someone with just an idea — you are welcome here.
+            Whether you are a beginner, an experienced developer, or someone
+            with just an idea — you are welcome here.
           </p>
-          
+
           <div className="flex flex-col items-center gap-6">
-             <Link
+            <Link
               href="/projects"
               className="inline-flex items-center gap-2 bg-white text-black px-8 py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all active:scale-[0.98] shadow-lg shadow-white/5"
             >
               Explore Projects <ArrowRight className="w-4 h-4" />
             </Link>
-            
+
             {/* 7. Philosophy */}
             <p className="text-xs font-mono text-zinc-600 uppercase tracking-widest">
               Build. Contribute. Collaborate.
             </p>
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -12,7 +12,7 @@ import {
   Users,
   Briefcase,
   Activity,
-  ExternalLink,
+  Linkedin, // Added Linkedin Icon
 } from "lucide-react";
 import Link from "next/link";
 import { doc, getDoc } from "firebase/firestore";
@@ -55,6 +55,86 @@ const StatCard = ({
   </div>
 );
 
+// NEW: Clean Profile Card Component
+const ContributorProfileCard = ({
+  name,
+  github,
+  linkedin,
+  prLink,
+  type = "idea", // 'idea' or 'code'
+}: {
+  name: string;
+  github?: string;
+  linkedin?: string;
+  prLink?: string;
+  type?: "idea" | "code";
+}) => {
+  const isIdea = type === "idea";
+  const iconColorClass = isIdea
+    ? "text-yellow-500 bg-yellow-500/10 border-yellow-500/20"
+    : "text-emerald-500 bg-emerald-500/10 border-emerald-500/20";
+
+  return (
+    <div className="group flex flex-col justify-between p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/60 hover:border-zinc-700 hover:bg-zinc-900/80 transition-all duration-300">
+      <div className="flex items-center gap-3">
+        {/* User Avatar Placeholder */}
+        <div
+          className={`w-10 h-10 rounded-full flex items-center justify-center border ${iconColorClass}`}
+        >
+          <User
+            className={`w-5 h-5 ${isIdea ? "text-yellow-500" : "text-emerald-500"}`}
+          />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-semibold text-zinc-200 text-sm group-hover:text-white transition-colors">
+            {name}
+          </span>
+          <span className="text-[10px] text-zinc-500 font-medium uppercase tracking-wide">
+            {isIdea ? "Idea Creator" : "Contributor"}
+          </span>
+        </div>
+      </div>
+
+      {/* Social Actions */}
+      <div className="flex items-center gap-2 mt-3">
+        {github && (
+          <a
+            href={`https://github.com/${github}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-white hover:text-black transition-colors"
+            title="GitHub Profile"
+          >
+            <Github className="w-4 h-4" />
+          </a>
+        )}
+        {linkedin && (
+          <a
+            href={linkedin}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-[#0077b5] hover:text-white transition-colors"
+            title="LinkedIn Profile"
+          >
+            <Linkedin className="w-4 h-4" />
+          </a>
+        )}
+        {prLink && !isIdea && (
+          <a
+            href={prLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-emerald-500 hover:text-white transition-colors"
+            title="View Pull Request"
+          >
+            <GitPullRequest className="w-4 h-4" />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export default function ProjectDetailPage({
   params,
 }: {
@@ -63,8 +143,12 @@ export default function ProjectDetailPage({
   const { id } = use(params);
   const { user, isSignedIn } = useUser();
   const [project, setProject] = useState<any>(null);
-  const [approvedFeatures, setApprovedFeatures] = useState<ProjectFeature[]>([]);
-  const [approvedContributions, setApprovedContributions] = useState<ProjectContribution[]>([]);
+  const [approvedFeatures, setApprovedFeatures] = useState<ProjectFeature[]>(
+    [],
+  );
+  const [approvedContributions, setApprovedContributions] = useState<
+    ProjectContribution[]
+  >([]);
   const [loading, setLoading] = useState(true);
   const [showLoginPopup, setShowLoginPopup] = useState(false);
   const { openSignIn } = useClerk();
@@ -77,13 +161,13 @@ export default function ProjectDetailPage({
 
         if (docSnap.exists()) {
           setProject({ id: docSnap.id, ...docSnap.data() });
-          
+
           // Load approved features for this project
-          const features = await getFeaturesByProject(id, 'approved');
+          const features = await getFeaturesByProject(id, "approved");
           setApprovedFeatures(features);
-          
+
           // Load approved contributions for this project
-          const contributions = await getContributionsByProject(id, 'approved');
+          const contributions = await getContributionsByProject(id, "approved");
           setApprovedContributions(contributions);
         } else {
           console.log("No such project!");
@@ -228,7 +312,7 @@ export default function ProjectDetailPage({
           </div>
 
           {/* Compact Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2 pt-2">
+          <div className="flex flex-wrap items-center gap-3 pt-4">
             <button
               onClick={() => {
                 if (!isSignedIn) {
@@ -237,10 +321,10 @@ export default function ProjectDetailPage({
                   window.location.href = `/feature-ideas?projectId=${id}&projectName=${encodeURIComponent(project.title)}`;
                 }
               }}
-              className="flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 text-yellow-400 text-base font-bold hover:from-yellow-500/30 hover:to-orange-500/30 hover:border-yellow-500/50 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-yellow-500/10"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 text-yellow-400 text-xs font-bold hover:from-yellow-500/20 hover:to-orange-500/20 hover:border-yellow-500/40 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-yellow-500/5"
             >
-              <Lightbulb className="w-4 h-4" />
-              HAVE AN IDEA ?
+              <Lightbulb className="w-3.5 h-3.5" />
+              HAVE AN IDEA?
             </button>
 
             <button
@@ -251,10 +335,10 @@ export default function ProjectDetailPage({
                   window.location.href = `/contribute-form?projectId=${id}&projectName=${encodeURIComponent(project.title)}`;
                 }
               }}
-              className="flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-emerald-500/20 to-green-500/20 border border-emerald-500/30 text-emerald-400 text-base font-bold hover:from-emerald-500/30 hover:to-green-500/30 hover:border-emerald-500/50 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/10"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500/10 to-green-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold hover:from-emerald-500/20 hover:to-green-500/20 hover:border-emerald-500/40 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/5"
             >
-              <GitPullRequest className="w-4 h-4" />
-              WANTS TO CONTRIBUTE ?
+              <GitPullRequest className="w-3.5 h-3.5" />
+              WANT TO CONTRIBUTE?
             </button>
 
             <div className="w-px h-6 bg-zinc-800 mx-1 hidden sm:block"></div>
@@ -337,7 +421,10 @@ export default function ProjectDetailPage({
           {project.features && (
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-white mb-4 group flex items-center gap-2 cursor-default">
-                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">#</span> Features
+                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">
+                  #
+                </span>{" "}
+                Features
               </h2>
               <div className="text-zinc-400 leading-relaxed prose prose-invert prose-li:marker:text-white pl-8">
                 <MarkdownRenderer content={project.features} />
@@ -345,156 +432,56 @@ export default function ProjectDetailPage({
             </div>
           )}
 
-          {/* Idea Contributors Section */}
+          {/* Idea Contributors Section - CLEAN GRID */}
           {approvedFeatures.length > 0 && (
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-white mb-6 group flex items-center gap-3 cursor-default">
-                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">#</span> 
+                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">
+                  #
+                </span>
                 <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
-                    <Lightbulb className="w-5 h-5 text-yellow-500" />
+                  <Lightbulb className="w-5 h-5 text-yellow-500" />
                 </div>
                 Idea Contributors
               </h2>
-              <div className="grid grid-cols-1 gap-4">
+              {/* Changed to Grid Layout for User Profiles */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {approvedFeatures.map((feature) => (
-                  <div key={feature.id} className="group relative p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-all duration-300">
-                    {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-
-                    <div className="relative flex flex-col gap-4">
-                        {/* Header: Title & Meta */}
-                        <div className="flex items-start justify-between gap-4">
-                            <div className="space-y-1.5">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <h3 className="font-semibold text-zinc-100 text-lg leading-tight group-hover:text-yellow-400 transition-colors">
-                                        {feature.title}
-                                    </h3>
-                                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] uppercase font-bold tracking-wider">
-                                        Approved
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-3 text-xs text-zinc-500">
-                                    <div className="flex items-center gap-1.5">
-                                        <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
-                                            <User className="w-3 h-3 text-zinc-400" />
-                                        </div>
-                                        <span className="font-medium text-zinc-400">{feature.name}</span>
-                                    </div>
-                                    <span className="text-zinc-700">•</span>
-                                    <div className="flex items-center gap-1.5">
-                                        <Calendar className="w-3.5 h-3.5" />
-                                        {feature.createdAt?.toDate ? feature.createdAt.toDate().toLocaleDateString() : 'Recent'}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <a
-                                href={`https://github.com/${feature.github}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center w-9 h-9 rounded-xl bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-white hover:text-black hover:border-white transition-all shrink-0"
-                                title={`View ${feature.github}'s profile`}
-                            >
-                                <Github className="w-4.5 h-4.5" />
-                            </a>
-                        </div>
-
-                        {/* Body */}
-                        <p className="text-sm text-zinc-400 leading-relaxed pl-1 border-l-2 border-zinc-800">
-                            {feature.description}
-                        </p>
-
-                        {/* Footer: Tags */}
-                        <div className="flex flex-wrap items-center gap-2 pt-2">
-                             <span className="px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-700/50 text-xs text-zinc-400 font-medium">
-                                {feature.category}
-                             </span>
-                             <span className="px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-700/50 text-xs text-zinc-400 font-medium">
-                                {feature.difficulty}
-                             </span>
-                        </div>
-                    </div>
-                  </div>
+                  <ContributorProfileCard
+                    key={feature.id}
+                    name={feature.name}
+                    github={feature.github}
+                    linkedin={(feature as any).linkedin} // Assuming linkedin property exists or is added to data
+                    type="idea"
+                  />
                 ))}
               </div>
             </div>
           )}
 
-          {/* Contributors Section */}
+          {/* Contributors Section - CLEAN GRID */}
           {approvedContributions.length > 0 && (
             <div className="mb-12">
               <h2 className="text-2xl font-bold text-white mb-6 group flex items-center gap-3 cursor-default">
-                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">#</span> 
+                <span className="text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -ml-6">
+                  #
+                </span>
                 <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                    <GitPullRequest className="w-5 h-5 text-emerald-500" />
+                  <GitPullRequest className="w-5 h-5 text-emerald-500" />
                 </div>
                 Contributors
               </h2>
-              <div className="grid grid-cols-1 gap-4">
+              {/* Changed to Grid Layout for User Profiles */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {approvedContributions.map((contribution) => (
-                  <div key={contribution.id} className="group relative p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-all duration-300">
-                    {/* Hover Glow Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl" />
-
-                    <div className="relative flex flex-col gap-4">
-                        {/* Header: Title & Meta */}
-                        <div className="flex items-start justify-between gap-4">
-                            <div className="space-y-1.5">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                    <h3 className="font-semibold text-zinc-100 text-lg leading-tight group-hover:text-emerald-400 transition-colors">
-                                        {contribution.title}
-                                    </h3>
-                                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] uppercase font-bold tracking-wider">
-                                        Approved
-                                    </span>
-                                </div>
-                                <div className="flex items-center gap-3 text-xs text-zinc-500">
-                                    <div className="flex items-center gap-1.5">
-                                        <div className="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center">
-                                            <User className="w-3 h-3 text-zinc-400" />
-                                        </div>
-                                        <span className="font-medium text-zinc-400">{contribution.name}</span>
-                                    </div>
-                                    <span className="text-zinc-700">•</span>
-                                    <div className="flex items-center gap-1.5">
-                                        <Calendar className="w-3.5 h-3.5" />
-                                        {contribution.createdAt?.toDate ? contribution.createdAt.toDate().toLocaleDateString() : 'Recent'}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <a
-                                href={`https://github.com/${contribution.github}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center w-9 h-9 rounded-xl bg-zinc-800/50 text-zinc-400 border border-zinc-700/50 hover:bg-white hover:text-black hover:border-white transition-all shrink-0"
-                                title={`View ${contribution.github}'s profile`}
-                            >
-                                <Github className="w-4.5 h-4.5" />
-                            </a>
-                        </div>
-
-                        {/* Body */}
-                        <p className="text-sm text-zinc-400 leading-relaxed pl-1 border-l-2 border-zinc-800">
-                            {contribution.description}
-                        </p>
-
-                        {/* Footer: Tags */}
-                        <div className="flex flex-wrap items-center gap-2 pt-2">
-                             <span className="px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-700/50 text-xs text-zinc-400 font-medium">
-                                {contribution.contributionType}
-                             </span>
-                             <span className="px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-700/50 text-xs text-zinc-400 font-medium">
-                                {contribution.experienceLevel}
-                             </span>
-                             {contribution.timeline && (
-                                <span className="px-2.5 py-1 rounded-md bg-zinc-800/40 border border-zinc-700/50 text-xs text-zinc-400 font-medium">
-                                    {contribution.timeline}
-                                </span>
-                             )}
-                        </div>
-                    </div>
-                  </div>
+                  <ContributorProfileCard
+                    key={contribution.id}
+                    name={contribution.name}
+                    github={contribution.github}
+                    linkedin={(contribution as any).linkedin}
+                    prLink={(contribution as any).prLink}
+                    type="code"
+                  />
                 ))}
               </div>
             </div>
@@ -511,7 +498,7 @@ export default function ProjectDetailPage({
           </div>
         </div>
       </div>
-      <LoginPopup 
+      <LoginPopup
         isOpen={showLoginPopup}
         onClose={() => setShowLoginPopup(false)}
         message="Please sign in to submit ideas or contribute to this project."
