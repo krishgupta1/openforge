@@ -162,7 +162,7 @@ export default function LandingPage() {
                     </p>
 
                     <a 
-                        href="https://buymeacoffee.com/sahilmishra" 
+                        href="https://buymeacoffee.com/krishgupta5" 
                         target="_blank" 
                         rel="noopener noreferrer"
                         className="mt-2 bg-[#FFDD00] text-black font-bold text-sm px-6 py-3 rounded-lg hover:bg-[#ffe44d] hover:scale-105 transition-all duration-300 flex items-center gap-2 shadow-[0_0_15px_-3px_rgba(255,221,0,0.4)]"
