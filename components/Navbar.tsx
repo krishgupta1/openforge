@@ -293,7 +293,7 @@ function NavLink({
       className={`px-3 py-1.5 text-xs font-medium transition-all duration-300 rounded-full focus:outline-none border ${
         isActive
           ? "text-white bg-white/10 border-white/5"
-          : "text-neutral-400 hover:text-white hover:bg-white/5 border-transparent"
+          : "text-white hover:text-white hover:bg-white/5 border-transparent"
       }`}
     >
       {children}
