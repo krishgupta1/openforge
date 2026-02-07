@@ -1,115 +1,79 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Globe, Github, ArrowRight, Eye } from "lucide-react";
+import { Globe, Github, ArrowRight, Eye, X } from "lucide-react";
 import Link from "next/link";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
+// --- CONSTANTS ---
+// FOR NOW: Using the specific provided link for all previews
+const TEST_VIDEO_URL = "https://drive.google.com/file/d/1NVrfki6v2C5wxgtNW2cxPKsqyhaUVzNk/view?usp=sharing";
+
 // --- Components ---
 
+// 1. Video Modal Component
+const VideoModal = ({ url, onClose }: { url: string; onClose: () => void }) => {
+  // Logic to convert Google Drive 'view' links to 'preview'
+  const getEmbedUrl = (videoUrl: string) => {
+    if (!videoUrl) return "";
+    
+    // Check if it's a Google Drive link
+    if (videoUrl.includes("drive.google.com")) {
+      // Replace /view or /view?usp=sharing with /preview
+      return videoUrl.replace(/\/view.*/, "/preview");
+    }
+    
+    return videoUrl;
+  };
+
+  return (
+    <div 
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10"
+      role="dialog"
+      aria-modal="true"
+    >
+      {/* Blurred Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-300" 
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
+      />
+
+      {/* Video Container */}
+      <div className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex flex-col animate-in zoom-in-95 duration-300">
+        
+        {/* Close Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
+          className="absolute top-4 right-4 z-50 p-2 bg-black/50 hover:bg-white/20 text-white rounded-full backdrop-blur-sm transition-all border border-white/10 group"
+        >
+          <X className="w-5 h-5 group-hover:scale-110 transition-transform" />
+        </button>
+
+        {/* The Iframe Player */}
+        <iframe
+          src={getEmbedUrl(url)}
+          className="w-full h-full"
+          allow="autoplay; encrypted-media; fullscreen"
+          allowFullScreen
+          title="Project Preview"
+        />
+      </div>
+    </div>
+  );
+};
+
 const TechIcon = ({ name }: { name: string }) => {
+  // ... (Keeping your existing icon logic same for brevity)
   const logoMap: { [key: string]: string } = {
-    // Frontend
-    React: "react.png",
-    "Next.js": "nextjs2.png",
-    Vue: "vuejs.png",
-    Angular: "angular.png",
-    Svelte: "sveltejs.png",
-    TypeScript: "typescript.png",
-    JavaScript: "js.png",
-    HTML5: "html5.png",
-    CSS3: "css3.png",
-    Tailwind: "tailwindcss.png",
-    Bootstrap: "bootstrap5.png",
-    MaterialUI: "materialui.png",
-    ChakraUI: "chakraui.png",
-    shadcn: "shadcnui.png",
-
-    // Backend
-    "Node.js": "nodejs.png",
-    Python: "python.png",
-    Java: "java.png",
-    "C#": "csharp.png",
-    PHP: "php.png",
-    Ruby: "ruby.png",
-    Go: "go.png",
-    Rust: "rust.png",
-    Swift: "swift.png",
-    Kotlin: "kotlin.png",
-    Dart: "dart.png",
-    Elixir: "elixir.png",
-    Clojure: "clojure.png",
-    Haskell: "haskell.png",
-
-    // Databases
-    PostgreSQL: "postgresql.png",
-    MySQL: "mysql.png",
-    MongoDB: "mongodb.png",
-    Redis: "redis.png",
-    SQLite: "sqlite.png",
-    Elasticsearch: "elastic.png",
-
-    // Cloud & DevOps
-    AWS: "aws.png",
-    Google: "google.png",
-    Azure: "azure.png",
-    Vercel: "vercel.png",
-    Netlify: "netlify.png",
-    Heroku: "heroku.png",
-    DigitalOcean: "digitalocean.png",
-    Cloudflare: "cloudflare.png",
-    Docker: "docker.png",
-    Kubernetes: "kubernetes.png",
-    Terraform: "terraform.png",
-
-    // Tools & Libraries
-    Git: "git.png",
-    GitHub: "github.png",
-    GitLab: "gitlab.png",
-    NPM: "npm.png",
-    Yarn: "yarn.png",
-    Webpack: "webpack.png",
-    Vite: "vitejs.png",
-    Babel: "babel.png",
-    ESLint: "eslint.png",
-    Prettier: "prettier.png",
-    Jest: "jest.png",
-    Cypress: "cypress.png",
-    Playwright: "playwright.png",
-
-    // AI/ML
-    OpenAI: "openai.png",
-    TensorFlow: "tensorflow.png",
-    PyTorch: "pytorch.png",
-    HuggingFace: "huggingface.png",
-
-    // Mobile
-    "React Native": "reactnative.png",
-    Flutter: "flutter.png",
-
-    // Blockchain
-    Solidity: "solidity.png",
-    "Web3.js": "web3js.png",
-
-    // Other
-    GraphQL: "graphql.png",
-    ThreeJS: "threejs.png",
-    WebSocket: "websocket.png",
-    FFmpeg: "ffmpeg.png",
-    Supabase: "supabase.png",
-    Firebase: "firebase.png",
-    Figma: "figma.png",
-    VSCode: "vscode.png",
-
-    // Legacy mappings
-    Bun: "bunjs.png",
-    WASM: "webassembly.png",
-    WebGL: "threejs.png",
-    Linux: "linux.png",
-    "D3.js": "d3js.png",
-    FastAPI: "fastapi.png",
+    React: "react.png", "Next.js": "nextjs2.png", Vue: "vuejs.png", Angular: "angular.png", Svelte: "sveltejs.png", TypeScript: "typescript.png", JavaScript: "js.png", HTML5: "html5.png", CSS3: "css3.png", Tailwind: "tailwindcss.png", Bootstrap: "bootstrap5.png", MaterialUI: "materialui.png", ChakraUI: "chakraui.png", shadcn: "shadcnui.png", "Node.js": "nodejs.png", Python: "python.png", Java: "java.png", "C#": "csharp.png", PHP: "php.png", Ruby: "ruby.png", Go: "go.png", Rust: "rust.png", Swift: "swift.png", Kotlin: "kotlin.png", Dart: "dart.png", Elixir: "elixir.png", Clojure: "clojure.png", Haskell: "haskell.png", PostgreSQL: "postgresql.png", MySQL: "mysql.png", MongoDB: "mongodb.png", Redis: "redis.png", SQLite: "sqlite.png", Elasticsearch: "elastic.png", AWS: "aws.png", Google: "google.png", Azure: "azure.png", Vercel: "vercel.png", Netlify: "netlify.png", Heroku: "heroku.png", DigitalOcean: "digitalocean.png", Cloudflare: "cloudflare.png", Docker: "docker.png", Kubernetes: "kubernetes.png", Terraform: "terraform.png", Git: "git.png", GitHub: "github.png", GitLab: "gitlab.png", NPM: "npm.png", Yarn: "yarn.png", Webpack: "webpack.png", Vite: "vitejs.png", Babel: "babel.png", ESLint: "eslint.png", Prettier: "prettier.png", Jest: "jest.png", Cypress: "cypress.png", Playwright: "playwright.png", OpenAI: "openai.png", TensorFlow: "tensorflow.png", PyTorch: "pytorch.png", HuggingFace: "huggingface.png", "React Native": "reactnative.png", Flutter: "flutter.png", Solidity: "solidity.png", "Web3.js": "web3js.png", GraphQL: "graphql.png", ThreeJS: "threejs.png", WebSocket: "websocket.png", FFmpeg: "ffmpeg.png", Supabase: "supabase.png", Firebase: "firebase.png", Figma: "figma.png", VSCode: "vscode.png", Bun: "bunjs.png", WASM: "webassembly.png", WebGL: "threejs.png", Linux: "linux.png", "D3.js": "d3js.png", FastAPI: "fastapi.png",
   };
 
   const logoFile = logoMap[name];
@@ -176,6 +140,9 @@ export default function ProjectsPage() {
   const [activeTab, setActiveTab] = useState("All");
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // State for the video modal
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadProjects() {
@@ -194,6 +161,15 @@ export default function ProjectsPage() {
     }
     loadProjects();
   }, []);
+
+  // Handler to open video
+  const handleOpenVideo = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // FOR NOW: IGNORE DATABASE URL AND USE PROVIDED LINK
+    setSelectedVideo(TEST_VIDEO_URL);
+  };
 
   if (loading) {
     return <LoadingSpinner message="Loading projects..." />;
@@ -218,6 +194,12 @@ export default function ProjectsPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-white/20 pb-32">
+      
+      {/* --- VIDEO MODAL RENDER --- */}
+      {selectedVideo && (
+        <VideoModal url={selectedVideo} onClose={() => setSelectedVideo(null)} />
+      )}
+
       {/* --- Header Section --- */}
       <div className="max-w-4xl mx-auto px-6 pt-32 pb-12 text-center space-y-4">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
@@ -264,28 +246,28 @@ export default function ProjectsPage() {
                 key={index}
                 className="group flex flex-col bg-neutral-900/40 border border-white/5 rounded-xl overflow-hidden hover:border-white/20 transition-all duration-300"
               >
-                {/* --- Image Area --- */}
-                {/* FIX: Replaced fixed height with 'aspect-video' (16:9 ratio) to prevent cutting */}
-                <div className="aspect-video w-full relative overflow-hidden rounded-t-xl bg-[#0A0A0A]">
+                {/* --- Image Area / Preview Trigger --- */}
+                <div 
+                  className="aspect-video w-full relative overflow-hidden rounded-t-xl bg-[#0A0A0A] cursor-pointer"
+                  onClick={handleOpenVideo} 
+                >
                   {/* Overlay Button */}
-                  <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="px-4 py-2 bg-black/70 backdrop-blur-md border border-white/20 rounded-full text-white font-semibold text-xs flex items-center gap-2 shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                  <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="px-4 py-2 bg-black/70 backdrop-blur-md border border-white/20 rounded-full text-white font-semibold text-xs flex items-center gap-2 shadow-2xl transform translate-y-4 md:group-hover:translate-y-0 transition-transform duration-300">
                       <Eye className="w-3.5 h-3.5" />
                       VIEW PREVIEW
                     </div>
                   </div>
-
+                  
                   {/* Image */}
                   {project.mockupImage ? (
                     <img
                       src={`/mockups/${project.mockupImage}`}
                       alt={`${project.title} mockup`}
                       className="w-full h-full object-cover object-top rounded-t-xl
-                        /* DEFAULT: Subtle blur, slightly transparent */
-                        filter grayscale blur-[2px] opacity-70 scale-100
-                        /* HOVER: Sharp, Full Color, No scale to prevent overflow */
-                        group-hover:filter-none group-hover:blur-0 group-hover:grayscale-0 group-hover:opacity-100
-                        /* TRANSITION */
+                        md:filter md:grayscale md:blur-[2px] md:opacity-70 md:scale-100
+                        filter-none grayscale-0 opacity-100
+                        md:group-hover:filter-none md:group-hover:blur-0 md:group-hover:grayscale-0 md:group-hover:opacity-100
                         transition-all duration-500 ease-in-out"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
@@ -295,7 +277,7 @@ export default function ProjectsPage() {
                           parent.classList.add(
                             `bg-gradient-to-br`,
                             project.gradient ||
-                              "from-neutral-800 to-neutral-900",
+                            "from-neutral-800 to-neutral-900",
                           );
                         }
                       }}
@@ -319,20 +301,25 @@ export default function ProjectsPage() {
                       {project.liveUrl && (
                         <Globe
                           className="w-4 h-4 hover:text-white cursor-pointer transition-colors"
-                          onClick={() => window.open(project.liveUrl, "_blank")}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(project.liveUrl, "_blank");
+                          }}
                         />
                       )}
                       {project.githubUrl && (
                         <Github
                           className="w-4 h-4 hover:text-white cursor-pointer transition-colors"
-                          onClick={() =>
-                            window.open(project.githubUrl, "_blank")
-                          }
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            window.open(project.githubUrl, "_blank");
+                          }}
                         />
                       )}
                     </div>
                   </div>
-
+                  
+                  {/* Rest of the card content (Description, Tech Stack, Status) */}
                   <div className="mb-6">
                     <h4 className="text-[10px] font-bold text-neutral-600 uppercase tracking-widest mb-2">
                       Description
@@ -380,6 +367,7 @@ export default function ProjectsPage() {
                       <Link
                         href={`/projects/${project.id}`}
                         className="flex items-center gap-2 text-xs font-semibold text-white/40 hover:text-white transition-colors group/btn"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         View Details
                         <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />

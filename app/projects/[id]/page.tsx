@@ -355,7 +355,7 @@ export default function ProjectDetailPage({
               <a
                 href={project.githubUrl}
                 target="_blank"
-                className="flex items-center gap-1.5 text-xs font-medium text-zinc-400 hover:text-white transition-colors px-3 py-2"
+                className="flex items-center gap-1.5 text-xs font-bold text-white hover:text-zinc-300 transition-colors px-3 py-2"
               >
                 <Github className="w-3.5 h-3.5" /> Source
               </a>
