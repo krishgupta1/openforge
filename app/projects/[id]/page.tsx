@@ -405,22 +405,29 @@ export default function ProjectDetailPage({
             <div className="hidden sm:block w-px h-6 bg-zinc-800 mx-1"></div>
 
             <div className="flex items-center justify-center gap-2 mt-2 sm:mt-0">
-              {(project.liveUrl || hasVideoUrl) && (
+              {hasVideoUrl && (
                 <button
                   onClick={() => {
-                    if (hasVideoUrl) {
-                      // Open video modal directly with video URL
-                      setCurrentPreviewIndex(0);
-                      setShowPreviewModal(true);
-                    } else if (project.liveUrl) {
-                      window.open(project.liveUrl, '_blank');
-                    }
+                    // Open video modal directly with video URL
+                    setCurrentPreviewIndex(0);
+                    setShowPreviewModal(true);
                   }}
                   className="flex items-center gap-1.5 text-xs font-bold text-white hover:text-zinc-300 transition-colors px-3 py-2"
                 >
-                  <Globe className="w-3.5 h-3.5" /> 
-                  {hasVideoUrl ? 'Play Video' : 'Live Demo'}
+                  <Play className="w-3.5 h-3.5" /> 
+                  Play Video
                 </button>
+              )}
+              {project.liveUrl && (
+                <a
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs font-bold text-white hover:text-zinc-300 transition-colors px-3 py-2"
+                >
+                  <Globe className="w-3.5 h-3.5" /> 
+                  Live Demo
+                </a>
               )}
               <a
                 href={project.githubUrl}
@@ -579,7 +586,7 @@ export default function ProjectDetailPage({
       {/* Preview Modal */}
       {showPreviewModal && hasVideoUrl && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-6xl max-h-[90vh] flex flex-col">
+          <div className="relative w-full max-w-5xl flex flex-col">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-white text-lg font-semibold">
@@ -593,26 +600,26 @@ export default function ProjectDetailPage({
               </button>
             </div>
 
-            {/* Content */}
-            <div className="flex-1 flex items-center justify-center relative bg-black/20 rounded-lg overflow-hidden">
+            {/* Video Container */}
+            <div className="relative w-full bg-black rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
               {isYouTubeUrl(videoUrl) ? (
                 <iframe
                   src={getYouTubeEmbedUrl(videoUrl)}
-                  className="w-full h-full max-w-full max-h-full object-contain"
+                  className="absolute inset-0 w-full h-full"
                   allowFullScreen
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 />
               ) : isGoogleDriveUrl(videoUrl) ? (
                 <iframe
                   src={getGoogleDriveEmbedUrl(videoUrl)}
-                  className="w-full h-full max-w-full max-h-full object-contain"
+                  className="absolute inset-0 w-full h-full"
                   allowFullScreen
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 />
               ) : (
                 <video
                   src={videoUrl}
-                  className="max-w-full max-h-full object-contain"
+                  className="absolute inset-0 w-full h-full object-contain"
                   controls
                   autoPlay
                 />
@@ -621,12 +628,12 @@ export default function ProjectDetailPage({
 
             {/* External link */}
             {project.liveUrl && (
-              <div className="flex justify-center mt-4">
+              <div className="flex justify-center mt-6">
                 <a
                   href={project.liveUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white text-sm"
+                  className="flex items-center gap-2 px-6 py-3 bg-white text-black hover:bg-zinc-200 rounded-lg transition-colors text-sm font-medium"
                 >
                   <Globe className="w-4 h-4" />
                   Visit Live Site
