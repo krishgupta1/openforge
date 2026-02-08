@@ -161,7 +161,38 @@ export default function ShareIdeaPage() {
         difficulty: formData.difficulty,
         lookingFor: formData.lookingFor,
         leadProject: formData.leadProject,
+        email: user?.primaryEmailAddress?.emailAddress || 'your@email.com',
       });
+
+      // Send email receipt
+      try {
+        const response = await fetch('/api/send-feature-submission-email', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: user?.primaryEmailAddress?.emailAddress || 'your@email.com',
+            type: 'submission',
+            data: {
+              name: formData.name,
+              projectName: formData.projectTitle,
+              title: formData.projectTitle,
+              category: formData.category,
+              difficulty: formData.difficulty,
+            },
+          }),
+        });
+
+        if (!response.ok) {
+          console.error('Failed to send submission email:', await response.text());
+        } else {
+          console.log('✅ Feature idea submission email sent successfully');
+        }
+      } catch (emailError) {
+        console.error('Error sending submission email:', emailError);
+        // Continue even if email fails
+      }
 
       setIsSubmitted(true);
       setIsSubmitting(false);

@@ -281,7 +281,7 @@ export default function ContributePage() {
 
             <div className="flex flex-wrap justify-center gap-4">
               <a
-                href="YOUR_WHATSAPP_LINK_HERE"
+                href="https://chat.whatsapp.com/LiVK87vB8rQL5QBC0yrRbT?mode=gi_t"
                 target="_blank"
                 className="flex items-center gap-2 px-8 py-3.5 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-xl font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-[#25D366]/20"
               >

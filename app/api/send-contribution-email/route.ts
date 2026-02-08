@@ -6,6 +6,8 @@ import {
   sendJoinRequestSubmission,
   sendJoinRequestApproved,
   sendJoinRequestRejected,
+  sendIdeaApproved,
+  sendIdeaRejected,
 } from "@/lib/emailService";
 
 export async function POST(req: NextRequest) {
@@ -51,6 +53,16 @@ export async function POST(req: NextRequest) {
       });
     } else if (type === "join-request-rejected") {
       await sendJoinRequestRejected(email, {
+        name: data.name,
+        ideaTitle: data.ideaTitle,
+      });
+    } else if (type === "idea-approved") {
+      await sendIdeaApproved(email, {
+        name: data.name,
+        ideaTitle: data.ideaTitle,
+      });
+    } else if (type === "idea-rejected") {
+      await sendIdeaRejected(email, {
         name: data.name,
         ideaTitle: data.ideaTitle,
       });

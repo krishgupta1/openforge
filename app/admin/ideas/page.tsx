@@ -119,6 +119,33 @@ export default function AdminIdeasPage() {
     setActionLoading(ideaId);
     try {
       await updateIdeaStatus(ideaId, status);
+      
+      // Send email notification
+      const idea = ideas.find(i => i.id === ideaId);
+      if (idea) {
+        console.log("🔍 Found idea:", idea.email);
+        
+        try {
+          const emailType = status === 'approved' ? 'idea-approved' : 'idea-rejected';
+          await fetch("/api/send-contribution-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: emailType,
+              email: idea.email,
+              data: {
+                name: idea.name,
+                ideaTitle: idea.title,
+              },
+            }),
+          });
+          console.log("✅ Idea approval email notification sent for:", idea.email);
+        } catch (emailError) {
+          console.error('❌ Error sending idea approval notification email:', emailError);
+          // Continue even if email fails
+        }
+      }
+      
       await fetchIdeas(); // Refresh the list
     } catch (error) {
       console.error('Error updating idea status:', error);

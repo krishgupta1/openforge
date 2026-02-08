@@ -877,6 +877,339 @@ const emailTemplates = {
       </html>
     `,
   }),
+
+  ideaApproved: (data: {
+    name: string;
+    ideaTitle: string;
+  }) => ({
+    subject: `🎉 Idea Approved - ${data.ideaTitle}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Idea Approved</title>
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            overflow: hidden;
+          }
+          .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 30px;
+            text-align: center;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+          }
+          .content {
+            padding: 30px;
+          }
+          .section {
+            margin-bottom: 25px;
+          }
+          .section h2 {
+            color: #10b981;
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: 600;
+          }
+          .detail {
+            background-color: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+          }
+          .detail-label {
+            color: #71717a;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 5px;
+          }
+          .detail-value {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 500;
+          }
+          .footer {
+            background-color: #18181b;
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 1px solid #27272a;
+          }
+          .footer p {
+            margin: 0;
+            color: #71717a;
+            font-size: 14px;
+          }
+          .highlight {
+            color: #10b981;
+            font-weight: 600;
+          }
+          .status-badge {
+            display: inline-block;
+            background-color: #10b981;
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          .celebration {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <div class="celebration">🎉</div>
+            <h1>Idea Approved!</h1>
+          </div>
+          
+          <div class="content">
+            <div class="section">
+              <h2>Exciting news, <span class="highlight">${data.name}</span>!</h2>
+              <p>Your idea <strong>${data.ideaTitle}</strong> has been <strong class="highlight">approved</strong> by our admin team!</p>
+              <p>Your innovative idea is now live on the platform and visible to potential collaborators. Welcome to the community of innovators!</p>
+            </div>
+            
+            <div class="section">
+              <h2>Idea Details</h2>
+              <div class="detail">
+                <div class="detail-label">Idea Title</div>
+                <div class="detail-value">${data.ideaTitle}</div>
+              </div>
+              <div class="detail">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">
+                  <span class="status-badge">Approved</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="section">
+              <h2>Join Our Community</h2>
+              <p>Stay connected with our vibrant community of innovators and collaborators!</p>
+              <div style="background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); border-radius: 8px; padding: 15px; margin-bottom: 15px; text-align: center;">
+                <a href="https://chat.whatsapp.com/LiVK87vB8rQL5QBC0yrRbT?mode=gi_t" target="_blank" style="color: #ffffff; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-.651-.321-.887-.533l-2.375-1.362c-.292-.166-.663-.236-1.022-.236-.379 0-.742.083-1.022.236l-2.375 1.362c-.236.212-.436.384-.533.533-.097.149-.236.384-.321.887-.533l2.375-1.362c.292-.166.663-.236 1.022-.236.379 0 .742.083 1.022.236l2.375 1.362c.236.212.436.384.533.533.097.149.236.384.321.887.533l-2.375 1.362c-.292.166-.663.236-1.022.236-.379 0-.742-.083-1.022-.236l-2.375-1.362c-.236-.212-.436-.384-.533-.533-.097-.149-.236-.384-.321-.887-.533l2.375-1.362c.292-.166.663-.236 1.022-.236.379 0 .742.083 1.022.236l2.375 1.362c.236.212.436.384.533.533.097.149.236.384.321.887.533z"/>
+                  </svg>
+                  Join WhatsApp Community
+                </a>
+              </div>
+              <p style="color: #a1a1aa; font-size: 14px; margin-top: 10px;">
+                Get real-time updates, connect with fellow contributors, and stay updated with latest opportunities!
+              </p>
+            </div>
+            
+            <div class="section">
+              <h2>What's Next?</h2>
+              <p>Your approved idea is now visible on the Ideas page where other community members can discover it and request to join your project.</p>
+              <p>Start preparing for collaboration by:</p>
+              <ul style="margin-left: 20px; margin-bottom: 15px;">
+                <li>Reviewing join requests from interested collaborators</li>
+                <li>Setting up project communication channels</li>
+                <li>Preparing technical documentation and guidelines</li>
+                <li>Planning your project roadmap</li>
+              </ul>
+              <p>We're excited to see what you'll build with your team!</p>
+            </div>
+          </div>
+          
+          <div class="footer">
+            <p>Congratulations and happy building!<br>The OpenForge Team</p>
+            <p style="margin-top: 10px; font-size: 12px;">This email was sent because your idea was approved on OpenForge.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  }),
+
+  ideaRejected: (data: {
+    name: string;
+    ideaTitle: string;
+  }) => ({
+    subject: `Idea Review Update - ${data.ideaTitle}`,
+    html: `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Idea Review Update</title>
+        <style>
+          body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #050505;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+          }
+          .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 12px;
+            overflow: hidden;
+          }
+          .header {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            padding: 30px;
+            text-align: center;
+          }
+          .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+          }
+          .content {
+            padding: 30px;
+          }
+          .section {
+            margin-bottom: 25px;
+          }
+          .section h2 {
+            color: #ef4444;
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: 600;
+          }
+          .detail {
+            background-color: #18181b;
+            border: 1px solid #27272a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+          }
+          .detail-label {
+            color: #71717a;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 5px;
+          }
+          .detail-value {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 500;
+          }
+          .footer {
+            background-color: #18181b;
+            padding: 20px 30px;
+            text-align: center;
+            border-top: 1px solid #27272a;
+          }
+          .footer p {
+            margin: 0;
+            color: #71717a;
+            font-size: 14px;
+          }
+          .highlight {
+            color: #ef4444;
+            font-weight: 600;
+          }
+          .status-badge {
+            display: inline-block;
+            background-color: #ef4444;
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+          }
+          .info-box {
+            background-color: #fef3c7;
+            border: 1px solid #fbbf24;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #92400e;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Idea Review Update</h1>
+          </div>
+          
+          <div class="content">
+            <div class="section">
+              <h2>Update on your idea</h2>
+              <p>Hi <span class="highlight">${data.name}</span>,</p>
+              <p>Thank you for submitting your idea <strong>${data.ideaTitle}</strong>. After careful review, our team has decided not to move forward with your idea at this time.</p>
+            </div>
+            
+            <div class="info-box">
+              <p><strong>Please don't be discouraged!</strong> This doesn't reflect on your creativity or potential. Sometimes ideas don't align with current platform priorities or feasibility constraints.</p>
+            </div>
+            
+            <div class="section">
+              <h2>Idea Details</h2>
+              <div class="detail">
+                <div class="detail-label">Idea Title</div>
+                <div class="detail-value">${data.ideaTitle}</div>
+              </div>
+              <div class="detail">
+                <div class="detail-label">Status</div>
+                <div class="detail-value">
+                  <span class="status-badge">Not Approved</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="section">
+              <h2>What's Next?</h2>
+              <p>We encourage you to:</p>
+              <ul style="margin-left: 20px; margin-bottom: 15px;">
+                <li>Refine your idea and consider resubmitting</li>
+                <li>Join existing projects that match your interests</li>
+                <li>Contribute to other innovative ideas on the platform</li>
+                <li>Keep developing your skills and experience</li>
+              </ul>
+              <p>Your passion and willingness to innovate are valuable to the community!</p>
+            </div>
+          </div>
+          
+          <div class="footer">
+            <p>Keep innovating and growing!<br>The OpenForge Team</p>
+            <p style="margin-top: 10px; font-size: 12px;">This email was sent because your idea was reviewed on OpenForge.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `,
+  }),
 };
 
 // Email sending functions
@@ -1122,6 +1455,58 @@ export async function sendFeatureIdeaRejected(email: string, data: {
     console.log('✅ Feature idea rejection email sent successfully to:', email);
   } catch (error) {
     console.error('❌ Error sending feature idea rejection email:', error);
+    throw error;
+  }
+}
+
+export async function sendIdeaApproved(email: string, data: {
+  name: string;
+  ideaTitle: string;
+}) {
+  // Validate email before sending
+  if (!email || !email.includes("@") || email === "your@email.com") {
+    throw new Error(`Invalid email address: ${email}`);
+  }
+
+  console.log("📨 Sending idea approval email to:", email);
+  
+  try {
+    const mailOptions = {
+      from: EMAIL_USER,
+      to: email,
+      ...emailTemplates.ideaApproved(data),
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Idea approval email sent successfully to:', email);
+  } catch (error) {
+    console.error('❌ Error sending idea approval email:', error);
+    throw error;
+  }
+}
+
+export async function sendIdeaRejected(email: string, data: {
+  name: string;
+  ideaTitle: string;
+}) {
+  // Validate email before sending
+  if (!email || !email.includes("@") || email === "your@email.com") {
+    throw new Error(`Invalid email address: ${email}`);
+  }
+
+  console.log("📨 Sending idea rejection email to:", email);
+  
+  try {
+    const mailOptions = {
+      from: EMAIL_USER,
+      to: email,
+      ...emailTemplates.ideaRejected(data),
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('✅ Idea rejection email sent successfully to:', email);
+  } catch (error) {
+    console.error('❌ Error sending idea rejection email:', error);
     throw error;
   }
 }

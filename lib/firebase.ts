@@ -35,6 +35,7 @@ export interface Idea {
   github: string;
   linkedin?: string;
   mobile?: string;
+  email: string;
   status: 'pending' | 'approved' | 'rejected';
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
