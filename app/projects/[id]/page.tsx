@@ -215,11 +215,16 @@ export default function ProjectDetailPage({
         : [];
 
   // Helper for preview images/videos
-  const previewFiles = project.previewImages 
-    ? project.previewImages.split(',').map((file: string) => file.trim()).filter((file: string) => file)
+  const previewFiles = project.previewImages
+    ? project.previewImages
+        .split(",")
+        .map((file: string) => file.trim())
+        .filter((file: string) => file)
     : [];
 
-  const hasVideoUrl = (project.videoUrl || project.videos) && (project.videoUrl || project.videos).trim() !== '';
+  const hasVideoUrl =
+    (project.videoUrl || project.videos) &&
+    (project.videoUrl || project.videos).trim() !== "";
   const videoUrl = project.videoUrl || project.videos;
 
   const openPreviewModal = () => {
@@ -227,11 +232,15 @@ export default function ProjectDetailPage({
     setShowPreviewModal(true);
   };
 
-  const navigatePreview = (direction: 'prev' | 'next') => {
-    if (direction === 'prev') {
-      setCurrentPreviewIndex((prev) => (prev === 0 ? previewFiles.length - 1 : prev - 1));
+  const navigatePreview = (direction: "prev" | "next") => {
+    if (direction === "prev") {
+      setCurrentPreviewIndex((prev) =>
+        prev === 0 ? previewFiles.length - 1 : prev - 1,
+      );
     } else {
-      setCurrentPreviewIndex((prev) => (prev === previewFiles.length - 1 ? 0 : prev + 1));
+      setCurrentPreviewIndex((prev) =>
+        prev === previewFiles.length - 1 ? 0 : prev + 1,
+      );
     }
   };
 
@@ -240,13 +249,13 @@ export default function ProjectDetailPage({
   };
 
   const isYouTubeUrl = (url: string) => {
-    return url.includes('youtube.com/watch') || url.includes('youtu.be/');
+    return url.includes("youtube.com/watch") || url.includes("youtu.be/");
   };
-  
+
   const isGoogleDriveUrl = (url: string) => {
-    return url.includes('drive.google.com');
+    return url.includes("drive.google.com");
   };
-  
+
   const getYouTubeEmbedUrl = (url: string) => {
     if (url.includes("youtube.com/watch")) {
       const videoId = url.split("v=")[1]?.split("&")[0];
@@ -264,7 +273,7 @@ export default function ProjectDetailPage({
 
     return url;
   };
-  
+
   const getGoogleDriveEmbedUrl = (url: string) => {
     // Replace /view or /view?usp=sharing with /preview
     return url.replace(/\/view.*/, "/preview");
@@ -301,15 +310,19 @@ export default function ProjectDetailPage({
         {/* ================= HERO SECTION (Compact) ================= */}
 
         {/* Banner Image */}
-        <div className="w-full aspect-video rounded-2xl relative overflow-hidden mb-8 border border-white/10 bg-zinc-900 shadow-xl shadow-black/50">
+        {/* FIX: Removed 'aspect-video' from parent so it adapts to image height naturally */}
+        <div className="w-full rounded-2xl relative overflow-hidden mb-8 border border-white/10 bg-zinc-900 shadow-xl shadow-black/50">
           {project.mockupImage ? (
             <img
               src={`/mockups/${project.mockupImage}`}
               alt={`${project.title} mockup`}
-              className="w-full h-full object-cover object-top"
+              // FIX: Changed to 'w-full h-auto block' to show full image without cropping
+              className="w-full h-auto block"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.style.display = "none";
+                // Restore aspect ratio if image fails so the gradient block isn't 0px height
+                target.parentElement?.classList.add("aspect-video");
                 target.parentElement!.className += ` bg-gradient-to-br ${
                   project.bannerGradient ||
                   "from-zinc-800 via-zinc-900 to-black"
@@ -318,7 +331,8 @@ export default function ProjectDetailPage({
             />
           ) : (
             <div
-              className={`w-full h-full bg-gradient-to-br ${
+              // FIX: Added 'aspect-video' here specifically for the fallback gradient
+              className={`w-full aspect-video bg-gradient-to-br ${
                 project.bannerGradient ||
                 "from-pink-600 via-purple-700 to-indigo-800"
               }`}
@@ -414,7 +428,7 @@ export default function ProjectDetailPage({
                   }}
                   className="flex items-center gap-1.5 text-xs font-bold text-white hover:text-zinc-300 transition-colors px-3 py-2"
                 >
-                  <Play className="w-3.5 h-3.5" /> 
+                  <Play className="w-3.5 h-3.5" />
                   Play Video
                 </button>
               )}
@@ -425,7 +439,7 @@ export default function ProjectDetailPage({
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-xs font-bold text-white hover:text-zinc-300 transition-colors px-3 py-2"
                 >
-                  <Globe className="w-3.5 h-3.5" /> 
+                  <Globe className="w-3.5 h-3.5" />
                   Live Demo
                 </a>
               )}
@@ -601,7 +615,10 @@ export default function ProjectDetailPage({
             </div>
 
             {/* Video Container */}
-            <div className="relative w-full bg-black rounded-lg overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+            <div
+              className="relative w-full bg-black rounded-lg overflow-hidden"
+              style={{ paddingBottom: "56.25%" }}
+            >
               {isYouTubeUrl(videoUrl) ? (
                 <iframe
                   src={getYouTubeEmbedUrl(videoUrl)}
