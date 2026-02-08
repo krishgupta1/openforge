@@ -172,13 +172,6 @@ export default function IdeasPage() {
             <Sparkles className="w-16 h-16 text-zinc-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-white mb-2">No approved ideas yet</h3>
             <p className="text-zinc-400 mb-6">Be the first to share an amazing project idea!</p>
-            <button
-              onClick={handleShareIdea}
-              className="inline-flex items-center gap-2 bg-white text-black text-sm font-bold px-6 py-2 rounded-full hover:bg-neutral-200 transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              Share an Idea
-            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
